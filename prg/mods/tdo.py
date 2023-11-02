@@ -30,7 +30,7 @@ def dne(event):
     for fnm, obj in find('todo', selector):
         nmr += 1
         obj.__deleted__ = True
-        sync(obj)
+        sync(obj, fnm)
         event.reply('ok')
         break
     if not nmr:

@@ -31,8 +31,6 @@ def __dir__():
 
 
 def find(mtc, selector=None, index=None) -> []:
-    if selector is None:
-        selector = {}
     clz = Storage.long(mtc)
     nr = -1
     for fnm in sorted(fns(clz), key=fntime):
@@ -43,7 +41,7 @@ def find(mtc, selector=None, index=None) -> []:
         fetch(obj, fnm)
         if '__deleted__' in obj:
             continue
-        if index is None and selector and not search(obj, selector):
+        if selector and not search(obj, selector):
             continue
         yield (fnm, obj)
 

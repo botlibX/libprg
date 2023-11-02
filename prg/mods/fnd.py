@@ -6,9 +6,12 @@
 "locate"
 
 
+import time
+
+
 from prg.object import fmt, keys
 from prg.disk   import Storage
-from prg.find   import find
+from prg.find   import find, fntime, laps
 
 
 def fnd(event):
@@ -23,6 +26,8 @@ def fnd(event):
         args.extend(keys(event.gets))
     if event.rest:
         args.extend(event.args[1:])
+    if not args:
+        args = None
     clz = Storage.long(otype)
     if "." not in clz:
         for fnm in Storage.files():
@@ -30,8 +35,9 @@ def fnd(event):
             if otype == claz.lower():
                 clz = fnm
     nmr = 0
-    for fnm, obj in find(clz, event.gets, event.index):
-        event.reply(f"{nmr} {fmt(obj, args, plain=True)}")
+    for fnm, obj in find(clz, event.gets):
+        lap = laps(time.time() - fntime(fnm))
+        event.reply(f"{nmr} {fmt(obj, args, plain=True)} {lap}")
         nmr += 1
     if not nmr:
         event.reply("no result")

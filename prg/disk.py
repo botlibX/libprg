@@ -117,6 +117,7 @@ def ident(obj) -> str:
                         os.path.join(*str(datetime.datetime.now()).split())
                        )
 
+
 def sync(obj, pth=None) -> str:
     if pth is None:
         pth = ident(obj)

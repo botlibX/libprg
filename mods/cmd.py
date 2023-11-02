@@ -10,4 +10,4 @@ from prg.run import CLI
 
 
 def cmd(event):
-    event.reply(",".join(sorted(CLI.cmds)))
+    event.reply(",".join(CLI.cmds))

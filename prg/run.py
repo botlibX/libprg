@@ -111,6 +111,7 @@ def parse(obj, txt=None) -> None:
     obj.cmd     = obj.cmd or ""
     obj.gets    = obj.gets or Default()
     obj.hasmods = obj.hasmod or False
+    obj.index   = None
     obj.mod     = obj.mod or ""
     obj.opts    = obj.opts or ""
     obj.result  = obj.reult or []

@@ -30,16 +30,20 @@ def __dir__():
 "utilities"
 
 
-def find(mtc, selector=None) -> []:
+def find(mtc, selector=None, index=None) -> []:
     if selector is None:
         selector = {}
     clz = Storage.long(mtc)
+    nr = -1
     for fnm in sorted(fns(clz), key=fntime):
+        nr += 1
+        if index is not None and nr != int(index):
+            continue
         obj = Default()
         fetch(obj, fnm)
         if '__deleted__' in obj:
             continue
-        if selector and not search(obj, selector):
+        if index is None and selector and not search(obj, selector):
             continue
         yield (fnm, obj)
 

@@ -46,7 +46,6 @@ def main():
     if "wd" in Cfg.sets:
         Storage.wd = Cfg.wd
     scan(mods)
-    print(CLI.cmds)
     evn = Event()
     evn.txt = Cfg.otxt
     parse(evn)

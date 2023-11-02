@@ -12,9 +12,6 @@ import time
 import types
 
 
-from .error import Errors
-
-
 def __dir__():
     return (
             'Thread',
@@ -47,10 +44,7 @@ class Thread(threading.Thread):
 
     def run(self) -> None:
         func, args = self.queue.get()
-        try:
-            self._result = func(*args)
-        except Exception as ex:
-            Errors.add(ex)
+        self._result = func(*args)
 
 
 def launch(func, *args, **kwargs) -> Thread:

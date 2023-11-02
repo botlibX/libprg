@@ -6,7 +6,7 @@
 "locate"
 
 
-from prg.object import fmt
+from prg.object import fmt, keys
 from prg.disk   import Storage
 from prg.find   import find
 

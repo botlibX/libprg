@@ -21,6 +21,7 @@ def __dir__():
         'Cfg',
         'CLI',
         'Event',
+        'lsmod',
         'parse',
         'scan'
     )
@@ -77,7 +78,7 @@ class Event(Default):
 "utilties"
 
 
-def mods(path) -> []:
+def lsmod(path) -> []:
     if not os.path.exists(path):
         return {}
     for fnm in os.listdir(path):
@@ -92,7 +93,7 @@ def scan(pkg, mnames=None) -> []:
     if not pkg:
         return []
     if mnames is None:
-       mnames = ",".join(mods(pkg.__path__[0]))
+       mnames = ",".join(lsmod(pkg.__path__[0]))
     for mname in spl(mnames):
         module = getattr(pkg, mname, None)
         if not module:

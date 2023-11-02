@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "libprg"
 description = "program library"
-version = "1"
+version = "2"
 authors = [
     {name = "libprg",email = "libbotx@gmail.com"},
 ]

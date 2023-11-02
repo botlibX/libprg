@@ -6,8 +6,10 @@
 "storage"
 
 
+import datetime
 import inspect
 import os
+import uuid
 
 
 from .object import Object, cdir, read, write

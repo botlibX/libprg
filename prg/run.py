@@ -12,8 +12,18 @@ import os
 import sys
 
 
-from .object import Default, Object, fmt, keys
+from .object import Default, Object, fmt, keys, spl
 from .disk   import Storage
+
+
+def __dir__():
+    return (
+        'Cfg',
+        'CLI',
+        'Event',
+        'parse',
+        'scan'
+    )
 
 
 "defines"
@@ -23,6 +33,7 @@ Cfg = Default()
 
 
 "cli"
+
 
 class CLI:
 
@@ -64,6 +75,33 @@ class Event(Default):
 
 
 "utilties"
+
+
+def mods(path) -> []:
+    if not os.path.exists(path):
+        return {}
+    for fnm in os.listdir(path):
+        if not fnm.endswith(".py"):
+            continue
+        if fnm in ["__main__.py", "__init__.py"]:
+            continue
+        yield fnm[:-3]
+
+
+def scan(pkg, mnames=None) -> []:
+    if not pkg:
+        return []
+    if mnames is None:
+       mnames = ",".join(mods(pkg.__path__[0]))
+    for mname in spl(mnames):
+        module = getattr(pkg, mname, None)
+        if not module:
+            continue
+        CLI.scan(module)
+        Storage.scan(module)
+
+
+"methods"
 
 
 def parse(obj, txt=None) -> None:
@@ -115,10 +153,3 @@ def parse(obj, txt=None) -> None:
         obj.txt  = obj.cmd + " " + obj.rest
     else:
         obj.txt = obj.cmd or ""
-
-
-"commands"
-
-
-def cmd(event):
-    event.reply(",".join(sorted(CLI.cmds)))

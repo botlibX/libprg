@@ -19,10 +19,11 @@ from .disk   import Storage, fetch, fqn, strip
 
 def __dir__():
     return (
-        "find",
-        "fns",
-        "fntime",
-        "last"
+        'find',
+        'fns',
+        'fntime',
+        'laps',
+        'last'
     )
 
 
@@ -71,6 +72,45 @@ def fntime(daystr) -> float:
     return timed
 
 
+def laps(seconds, short=True) -> str:
+    txt = ""
+    nsec = float(seconds)
+    if nsec < 1:
+        return f"{nsec:.2f}s"
+    year = 365*24*60*60
+    week = 7*24*60*60
+    nday = 24*60*60
+    hour = 60*60
+    minute = 60
+    years = int(nsec/year)
+    nsec -= years*year
+    weeks = int(nsec/week)
+    nsec -= weeks*week
+    nrdays = int(nsec/nday)
+    nsec -= nrdays*nday
+    hours = int(nsec/hour)
+    nsec -= hours*hour
+    minutes = int(nsec/minute)
+    nsec -= int(minute*minutes)
+    sec = int(nsec)
+    if years:
+        txt += f"{years}y"
+    if weeks:
+        nrdays += weeks * 7
+    if nrdays:
+        txt += f"{nrdays}d"
+    if nrdays and short and txt:
+        return txt.strip()
+    if hours:
+        txt += f"{hours}h"
+    if minutes:
+        txt += f"{minutes}m"
+    if sec:
+        txt += f"{sec}s"
+    txt = txt.strip()
+    return txt
+
+
 "methods"
 
 
@@ -100,32 +140,3 @@ def search(obj, selector) -> bool:
                 res = False
                 break
     return res
-
-
-"commands"
-
-
-def fnd(event):
-    if not event.rest:
-        res = sorted([x.split('.')[-1].lower() for x in Storage.files()])
-        if res:
-            event.reply(",".join(res))
-        return
-    otype = event.args[0]
-    args = []
-    if event.gets:
-        args.extend(keys(event.gets))
-    if event.rest:
-        args.extend(event.args[1:])
-    clz = Storage.long(otype)
-    if "." not in clz:
-        for fnm in Storage.files():
-            claz = fnm.split(".")[-1]
-            if otype == claz.lower():
-                clz = fnm
-    nmr = 0
-    for fnm, obj in find(clz, event.gets):
-        event.reply(f"{nmr} {fmt(obj, args, plain=True)}")
-        nmr += 1
-    if not nmr:
-        event.reply("no result")

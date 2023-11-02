@@ -8,13 +8,10 @@
 
 import mailbox
 import os
-import sys
 
 
-from prg.object import Default, Object, fmt, keys, update
-from prg.disk   import Storage, fqn, sync
-from prg.find   import find
-from prg.run    import parse
+from prg.object import Object, update
+from prg.disk   import fqn, sync
 
 
 "defines"

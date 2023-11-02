@@ -15,8 +15,8 @@ def popen(txt):
         print(line.strip())
 
 
+popen("bin/clean")
 popen("python3 setup.py sdist")
-print("")
 popen("python3 -m pip wheel -e .")
 popen("mv *.whl dist")
 print("")

@@ -18,19 +18,12 @@ sys.path.insert(0, os.getcwd())
 from prg.object import Default, Object, fmt, keys
 from prg.disk   import Storage
 from prg.find   import find
-from prg.run    import CLI, Event, parse, scan
+from prg.run    import Cfg, CLI, Event, parse, scan
 
 
 Storage.wd = os.path.expanduser("~/.prg")
 
-
-Cfg = Default()
-
-
-if os.path.exists("mods"):
-    import mods
-else:
-    mods = None
+import prg.mods as mods
 
 
 class Event(Event):

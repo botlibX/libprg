@@ -33,6 +33,7 @@ classifiers = [
 [tool.setuptools]
 packages = [
     'prg',
+    'prg.mods'
 ]
 zip-safe=true
 script-files = [
@@ -44,17 +45,6 @@ script-files = [
 "share/doc/libprg" = [
     "README.rst",
 ]
-"share/libprg/mods" = [
-    'mods/cmd.pu',
-    'mods/fnd.py',
-    'mods/log.py',
-    'mods/mbx.py',
-    'mods/mod.py',
-    'mods/shp.py',
-    'mods/tdo.py',
-]
-
-
 
 [tool.setuptools.exclude-package-data]
 "*" = [

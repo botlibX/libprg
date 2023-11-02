@@ -43,6 +43,8 @@ def __dir__():
     return (
             'Object',
             'construct',
+            'edit',
+            'fmt',
             'items',
             'keys',
             'read',

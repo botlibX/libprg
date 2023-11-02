@@ -12,12 +12,18 @@ import time
 import types
 
 
+"defines"
+
+
 def __dir__():
     return (
             'Thread',
             'launch',
             'name'
            )
+
+
+"thread"
 
 
 class Thread(threading.Thread):
@@ -47,11 +53,17 @@ class Thread(threading.Thread):
         self._result = func(*args)
 
 
+"utilities"
+
+
 def launch(func, *args, **kwargs) -> Thread:
     nme = kwargs.get("name", name(func))
     thread = Thread(func, nme, *args, **kwargs)
     thread.start()
     return thread
+
+
+"methods"
 
 
 def name(obj) -> str:

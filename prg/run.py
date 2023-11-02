@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
 #
-# pylint: disable=C0115,C0116,C0209,C0413,W0201,R0903,W0212
+# pylint: disable=C0115,C0116,C0209,C0413,W0201,R0903,W0212,E0402
+# pylint: disable=W0105,R1710
 
 
 "runtime"
@@ -9,10 +10,9 @@
 
 import inspect
 import os
-import sys
 
 
-from .object import Default, Object, fmt, keys, spl
+from .object import Default, Object, spl
 from .disk   import Storage
 
 
@@ -93,7 +93,7 @@ def scan(pkg, mnames=None) -> []:
     if not pkg:
         return []
     if mnames is None:
-       mnames = ",".join(lsmod(pkg.__path__[0]))
+        mnames = ",".join(lsmod(pkg.__path__[0]))
     for mname in spl(mnames):
         module = getattr(pkg, mname, None)
         if not module:

@@ -15,6 +15,7 @@ import time
 import _thread
 
 
+from .errors import Errors
 from .object import Default, Object, spl
 from .disk   import Storage
 
@@ -45,19 +46,6 @@ Cfg = Default()
 "cli"
 
 
-class Censor(Object):
-
-    output = None
-    words = []
-
-    @staticmethod
-    def skip(txt) -> bool:
-        for skp in Censor.words:
-            if skp in str(txt):
-                return True
-        return False
-
-
 class CLI:
 
     cmds = Object()
@@ -71,8 +59,11 @@ class CLI:
         func = getattr(CLI.cmds, evt.cmd, None)
         if not func:
             return
-        func(evt)
-        evt.show()
+        try:
+            func(evt)
+            evt.show()
+        except Exception as exc:
+            Errors.add(exc)
 
     @staticmethod
     def scan(mod) -> None:
@@ -81,40 +72,6 @@ class CLI:
                 continue
             if 'event' in cmd.__code__.co_varnames:
                 CLI.add(cmd)
-
-
-class Errors(Object):
-
-    errors = []
-
-    @staticmethod
-    def add(exc) -> None:
-        excp = exc.with_traceback(exc.__traceback__)
-        Errors.errors.append(excp)
-
-    @staticmethod
-    def format(exc) -> str:
-        res = ""
-        stream = io.StringIO(
-                             traceback.print_exception(
-                                                       type(exc),
-                                                       exc,
-                                                       exc.__traceback__
-                                                      )
-                            )
-        for line in stream.readlines():
-            res += line + "\n"
-        return res
-
-    @staticmethod
-    def handle(exc) -> None:
-        if Censor.output:
-            Censor.output(Errors.format(exc))
-
-    @staticmethod
-    def show() -> None:
-        for exc in Errors.errors:
-            Errors.handle(exc)
 
 
 class Event(Default):

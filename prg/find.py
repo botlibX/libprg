@@ -101,10 +101,10 @@ def laps(seconds, short=True) -> str:
         nrdays += weeks * 7
     if nrdays:
         txt += f"{nrdays}d"
-    if nrdays and short and txt:
-        return txt.strip()
     if hours:
         txt += f"{hours}h"
+    if not nrdays and hours and short and txt:
+        return txt.strip()
     if minutes:
         txt += f"{minutes}m"
     if sec:

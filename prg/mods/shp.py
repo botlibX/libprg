@@ -41,7 +41,7 @@ def shp(event):
     if not event.rest:
         nmr = 0
         for fnm, obj in find('shop'):
-            lap = laps(time.time()-fntime(obj.__oid__))
+            lap = laps(time.time()-fntime(fnm))
             event.reply(f'{nmr} {obj.txt} {lap}')
             nmr += 1
         if not nmr:

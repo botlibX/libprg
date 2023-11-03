@@ -30,10 +30,7 @@ from prg.thread import launch
 STARTTIME = time.time()
 
 
-if os.path.exists("mods"):
-    import mods
-else:
-    mods = None
+import prg.mods as mods
 
  
 Cfg.debug = True
@@ -76,6 +73,8 @@ param.tdo = ["test4", ""]
 class Event(Event):
 
     def show(self) -> None:
+        if "v" not in Cfg.opts:
+            return
         for txt in self.result:
             print(txt.encode('utf-8', 'replace').decode())
             sys.stdout.flush()

@@ -10,6 +10,9 @@
 
 import inspect
 import os
+import termios
+import time
+import _thread
 
 
 from .object import Default, Object, spl
@@ -20,6 +23,7 @@ def __dir__():
     return (
         'Cfg',
         'CLI',
+        'Errors',
         'Event',
         'lsmod',
         'parse',
@@ -30,10 +34,28 @@ def __dir__():
 "defines"
 
 
+def debug(txt):
+    if "v" in Cfg.opts:
+        print(txt)
+
+
 Cfg = Default()
 
 
 "cli"
+
+
+class Censor(Object):
+
+    output = None
+    words = []
+
+    @staticmethod
+    def skip(txt) -> bool:
+        for skp in Censor.words:
+            if skp in str(txt):
+                return True
+        return False
 
 
 class CLI:
@@ -61,6 +83,40 @@ class CLI:
                 CLI.add(cmd)
 
 
+class Errors(Object):
+
+    errors = []
+
+    @staticmethod
+    def add(exc) -> None:
+        excp = exc.with_traceback(exc.__traceback__)
+        Errors.errors.append(excp)
+
+    @staticmethod
+    def format(exc) -> str:
+        res = ""
+        stream = io.StringIO(
+                             traceback.print_exception(
+                                                       type(exc),
+                                                       exc,
+                                                       exc.__traceback__
+                                                      )
+                            )
+        for line in stream.readlines():
+            res += line + "\n"
+        return res
+
+    @staticmethod
+    def handle(exc) -> None:
+        if Censor.output:
+            Censor.output(Errors.format(exc))
+
+    @staticmethod
+    def show() -> None:
+        for exc in Errors.errors:
+            Errors.handle(exc)
+
+
 class Event(Default):
 
     def __init__(self):
@@ -76,6 +132,15 @@ class Event(Default):
 
 
 "utilties"
+
+
+def forever():
+    debug("running forever")
+    while 1:
+        try:
+            time.sleep(1.0)
+        except:
+            _thread.interrupt_main()
 
 
 def lsmod(path) -> []:

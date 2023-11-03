@@ -10,6 +10,7 @@
 import inspect
 import os
 import sys
+import termios
 
 
 sys.path.insert(0, os.getcwd())
@@ -18,10 +19,11 @@ sys.path.insert(0, os.getcwd())
 from prg.object import Default, Object, fmt, keys
 from prg.disk   import Storage
 from prg.find   import find
-from prg.run    import Cfg, CLI, Event, parse, scan
+from prg.run    import Cfg, CLI, Errors, Event, parse, scan
 
 
 Storage.wd = os.path.expanduser("~/.prg")
+
 
 import prg.mods as mods
 
@@ -32,6 +34,22 @@ class Event(Event):
         for txt in self.result:
             print(txt.encode('utf-8', 'replace').decode())
             sys.stdout.flush()
+
+
+def wrap(func) -> None:
+    old = None
+    try:
+        old = termios.tcgetattr(sys.stdin.fileno())
+    except termios.error:
+        pass
+    try:
+        func()
+    except (EOFError, KeyboardInterrupt):
+        print("")
+        sys.stdout.flush()
+    finally:
+        if old:
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
 
 
 def main():
@@ -46,4 +64,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    wrap(main)
+    Errors.show()

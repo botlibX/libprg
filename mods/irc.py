@@ -18,16 +18,18 @@ import time
 import _thread
 
 
-from prg.error  import Censor
+from prg.disk   import sync
+from prg.error  import Censor, debug
 from prg.find	import last
-from prg.object import Broker, Default, Object, fmt, keys
-from prg.run    import Cfg, Reactor
+from prg.object import Broker, Default, Object, edit, fmt, keys
+from prg.run    import Cfg, CLI, Event, Reactor
+from prg.thread import launch
 
 
 "defines"
 
 
-NAME = Cfg.name or __file__.split(os.sep)[-3]
+NAME = Cfg.name or __file__.split(os.sep)[-2]
 
 
 Censor.words = ["PING", "PONG", "PRIVMSG"]
@@ -65,12 +67,12 @@ class Config(Default):
 
     def __init__(self):
         Default.__init__(self)
-        self.channel = Config.channel
-        self.nick = Config.nick
-        self.port = Config.port
-        self.realname = Config.realname
-        self.server = Config.server
-        self.username = Config.username
+        self.channel = self.channel or Config.channel
+        self.nick = self.nick or Config.nick
+        self.port = self.port or Config.port
+        self.realname = self.realname or Config.realname
+        self.server = self.server or Config.server
+        self.username = self.username or Config.username
 
 
 "cache"
@@ -563,8 +565,8 @@ def cb_notice(evt):
 
 def cb_privmsg(evt):
     bot = byorig(evt.orig)
-    if not Cfg.commands:
-        return
+    #if not Cfg.commands:
+    #    return
     if evt.txt:
         if evt.txt[0] in ['!',]:
             evt.txt = evt.txt[1:]
@@ -577,8 +579,8 @@ def cb_privmsg(evt):
         if bot.cfg.users and not Users.allowed(evt.origin, 'USER'):
             return
         debug(f"command from {evt.origin}: {evt.txt}")
-        parse(evt)
-        command(evt)
+        #parse(evt)
+        CLI.dispatch(evt)
 
 
 def cb_quit(evt):
@@ -593,7 +595,7 @@ def cb_quit(evt):
 
 def cfg(event):
     config = Config()
-    last(config)
+    path = last(config)
     if not event.sets:
         event.reply(
                     fmt(
@@ -604,7 +606,7 @@ def cfg(event):
                    )
     else:
         edit(config, event.sets)
-        sync(config)
+        sync(config, path)
         event.reply('ok')
 
 

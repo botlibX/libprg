@@ -1,6 +1,6 @@
 # This file is placed in the Public Domain.
 #
-# pylint: disable=E0402,E0602,C0116
+# pylint: disable=E0402,E0602,C0116,E0401
 
 
 "locate"

@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 #
 # pylint: disable=C0115,C0116,C0209,C0413,W0201,R0903,W0212,E0402
-# pylint: disable=W0105,R1710
+# pylint: disable=W0105,R1710,W0718,W0702
 
 
 "runtime"
@@ -10,13 +10,12 @@
 import inspect
 import os
 import queue
-import termios
 import time
 import threading
 import _thread
 
 
-from .error  import Errors, debug
+from .error  import Errors
 from .object import Broker, Default, Object, spl
 from .disk   import Storage
 from .thread import launch
@@ -53,6 +52,9 @@ class CLI:
     def add(func) -> None:
         setattr(CLI.cmds, func.__name__, func)
 
+    def announce(self, txt):
+        pass
+
     @staticmethod
     def dispatch(evt) -> None:
         parse(evt)
@@ -84,9 +86,14 @@ class Event(Default):
 
     def __init__(self):
         Default.__init__(self)
+        self._ready  = threading.Event()
+        self._thrs   = []
         self.orig    = None
         self.result  = []
         self.txt     = ""
+
+    def ready(self):
+        self._ready.set()
 
     def reply(self, txt) -> None:
         self.result.append(txt)
@@ -94,6 +101,12 @@ class Event(Default):
     def show(self) -> None:
         for txt in self.result:
             Broker.say(self.orig, self.channel, txt)
+
+    def wait(self):
+        for thr in self._thrs:
+            thr.join()
+        self._ready.wait()
+        return self.result
 
 
 "reactor"
@@ -161,8 +174,9 @@ def lsmod(path) -> []:
 
 
 def scan(pkg, mnames=None) -> []:
+    res = []
     if not pkg:
-        return []
+        return res
     if mnames is None:
         mnames = ",".join(lsmod(pkg.__path__[0]))
     for mname in spl(mnames):
@@ -171,6 +185,8 @@ def scan(pkg, mnames=None) -> []:
             continue
         CLI.scan(module)
         Storage.scan(module)
+        res.append(module)
+    return res
 
 
 "methods"

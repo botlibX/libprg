@@ -18,8 +18,11 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from prg.find   import find
-from prg.object import Default, Object
+from prg.disk   import sync
+from prg.find   import find, fntime, laps, last
+from prg.object import Broker, Default, Object, fmt, update
+from prg.run    import Cfg
+from prg.thread import Repeater, launch
 
 
 "defines"
@@ -32,6 +35,9 @@ def init():
 
 
 fetchlock = _thread.allocate_lock()
+
+
+"classes"
 
 
 class Feed(Default):
@@ -57,6 +63,7 @@ class Fetcher(Object):
 
     dosave = False
     seen = Seen()
+    seenfn = None
 
     @staticmethod
     def display(obj):
@@ -101,7 +108,7 @@ class Fetcher(Object):
                     sync(fed)
                 res.append(fed)
         if res:
-            sync(Fetcher.seen)
+            sync(Fetcher.seen, Fetcher.seenfn)
         txt = ''
         feedname = getattr(feed, 'name', None)
         if feedname:
@@ -118,7 +125,7 @@ class Fetcher(Object):
         return thrs
 
     def start(self, repeat=True):
-        last(Fetcher.seen)
+        Fetcher.seenfn = last(Fetcher.seen)
         if repeat:
             repeater = Repeater(300.0, self.run)
             repeater.start()

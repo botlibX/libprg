@@ -1,6 +1,7 @@
 # This file is placed in the Public Domain.
 #
 # pylint: disable=C0112,C0115,C0116,W0105,R0903,E0402,C0209,R1710,C0413
+# pylint: disable=C0103
 
 
 "locate"
@@ -10,7 +11,7 @@ import os
 import time
 
 
-from .object import Default, items, spl, update
+from .object import Default, items, search, spl, update
 from .disk   import Storage, fetch, fqn, strip
 
 
@@ -122,21 +123,6 @@ def last(obj, selector=None) -> None:
                     key=lambda x: fntime(x[0])
                    )
     if result:
-        inp = result[-1][-1]
-        update(obj, inp)
-
-
-def search(obj, selector) -> bool:
-    res = False
-    for key, value in items(selector):
-        if key not in obj:
-            res = False
-            break
-        for vval in spl(str(value)):
-            val = getattr(obj, key, None)
-            if str(vval).lower() in str(val).lower():
-                res = True
-            else:
-                res = False
-                break
-    return res
+        inp = result[-1]
+        update(obj, inp[-1])
+        return inp[0]

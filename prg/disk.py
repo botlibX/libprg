@@ -58,7 +58,7 @@ class Storage:
         if "." not in res:
             for fnm in Storage.files():
                 claz = fnm.split(".")[-1]
-                if otype == claz.lower():
+                if fnm == claz.lower():
                     res = fnm
         return res
 

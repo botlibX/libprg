@@ -21,7 +21,18 @@ from prg.object import Default, Object, fmt, keys
 from prg.disk   import Storage
 from prg.error  import Censor, Errors
 from prg.find   import find
-from prg.run    import Cfg, CLI, Errors, Event, Reactor, forever, parse, scan
+from prg.run    import Cfg, CLI, Errors, Event, Reactor, forever, parse
+from prg.run    import scan
+
+
+"defines"
+
+
+Cfg.name   = "prg"
+Storage.wd = os.path.expanduser("~/.prg")
+
+
+"modules"
 
 
 import prg.mods as modules
@@ -31,13 +42,6 @@ try:
     import mods
 except ModuleNotFoundError:
     mods = None
-
-
-"defines"
-
-
-Cfg.name   = "prg"
-Storage.wd = os.path.expanduser("~/.prg")
 
 
 "cli"
@@ -99,7 +103,9 @@ def main():
     if "wd" in Cfg.sets:
         Storage.wd = Cfg.wd
     scan(modules)
-    scan(mods)
+    for mod in scan(mods, Cfg.mod):
+        if "i" in Cfg.opts:
+            mod.init()
     if "c" in Cfg.opts:
        if "v" in Cfg.opts:
            dte = time.ctime(time.time()).replace("  ", " ")

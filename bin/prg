@@ -11,6 +11,7 @@ import inspect
 import os
 import sys
 import termios
+import time
 
 
 sys.path.insert(0, os.getcwd())
@@ -20,13 +21,26 @@ from prg.object import Default, Object, fmt, keys
 from prg.disk   import Storage
 from prg.error  import Censor, Errors
 from prg.find   import find
-from prg.run    import Cfg, CLI, Errors, Event, parse, scan
+from prg.run    import Cfg, CLI, Errors, Event, Reactor, forever, parse, scan
 
 
+import prg.mods as modules
+
+
+try:
+    import mods
+except ModuleNotFoundError:
+    mods = None
+
+
+"defines"
+
+
+Cfg.name   = "prg"
 Storage.wd = os.path.expanduser("~/.prg")
 
 
-import prg.mods as mods
+"cli"
 
 
 class CLI(CLI):
@@ -35,6 +49,30 @@ class CLI(CLI):
         print(txt.encode('utf-8', 'replace').decode())
         sys.stdout.flush()
 
+
+"console"
+
+
+class Console(Reactor, CLI):
+
+    def __init__(self):
+        Reactor.__init__(self)
+        CLI.__init__(self)
+        self.register("command", self.dispatch)
+
+    def dispatch(self, evt):
+        CLI.dispatch(evt)
+
+    def poll(self) -> Event:
+        evt = Event()
+        evt.orig = object.__repr__(self)
+        evt.txt = input("> ")
+        evt.type = "command"
+        return evt
+
+
+"utilities"
+        
 
 def wrap(func) -> None:
     old = None
@@ -52,12 +90,24 @@ def wrap(func) -> None:
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
 
 
+"runtime"
+
+
 def main():
     Censor.output = print
     parse(Cfg, " ".join(sys.argv[1:]))
     if "wd" in Cfg.sets:
         Storage.wd = Cfg.wd
+    scan(modules)
     scan(mods)
+    if "c" in Cfg.opts:
+       if "v" in Cfg.opts:
+           dte = time.ctime(time.time()).replace("  ", " ")
+           print(f"{Cfg.name.upper()} started {dte} {Cfg.opts.upper()}")
+       csl = Console()
+       csl.start()
+       forever()
+       return
     cli = CLI()
     evn = Event()
     evn.orig = object.__repr__(cli)

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # This file is placed in the Public Domain.
 #
 # pylint: disable=C0115,C0116,C0209,C0413,W0201,R0903,W0212,E0402
@@ -10,15 +9,20 @@
 
 import inspect
 import os
+import queue
 import termios
 import time
+import threading
 import _thread
 
 
-from .broker import Broker
 from .error  import Errors, debug
-from .object import Default, Object, spl
+from .object import Broker, Default, Object, spl
 from .disk   import Storage
+from .thread import launch
+
+
+"defines"
 
 
 def __dir__():
@@ -30,9 +34,6 @@ def __dir__():
         'parse',
         'scan'
     )
-
-
-"defines"
 
 
 Cfg = Default()
@@ -54,6 +55,7 @@ class CLI:
 
     @staticmethod
     def dispatch(evt) -> None:
+        parse(evt)
         func = getattr(CLI.cmds, evt.cmd, None)
         if not func:
             return
@@ -75,6 +77,9 @@ class CLI:
                 CLI.add(cmd)
 
 
+"event"
+
+
 class Event(Default):
 
     def __init__(self):
@@ -91,11 +96,52 @@ class Event(Default):
             Broker.say(self.orig, self.channel, txt)
 
 
+"reactor"
+
+
+class Reactor(Object):
+
+    def __init__(self):
+        Object.__init__(self)
+        self.cbs     = Object()
+        self.queue   = queue.Queue()
+        self.stopped = threading.Event()
+        Broker.add(self)
+
+    def dispatch(self, evt) -> None:
+        func = getattr(self.cbs, evt.type, None)
+        if not func:
+            evt.ready()
+            return
+        evt._thr = launch(func, evt)
+
+    def loop(self) -> None:
+        while not self.stopped.is_set():
+            try:
+                self.dispatch(self.poll())
+            except (KeyboardInterrupt, EOFError):
+                _thread.interrupt_main()
+
+    def poll(self) -> Event:
+        return self.queue.get()
+
+    def put(self, evt) -> None:
+        self.queue.put_nowait(evt)
+
+    def register(self, typ, cbs) -> None:
+        setattr(self.cbs, typ, cbs)
+
+    def start(self) -> None:
+        launch(self.loop)
+
+    def stop(self) -> None:
+        self.stopped.set()
+
+
 "utilties"
 
 
 def forever():
-    debug("running forever")
     while 1:
         try:
             time.sleep(1.0)

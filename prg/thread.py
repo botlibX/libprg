@@ -12,6 +12,7 @@ import time
 import types
 
 
+from .error  import Errors
 from .object import Object
 
 
@@ -55,7 +56,10 @@ class Thread(threading.Thread):
 
     def run(self) -> None:
         func, args = self.queue.get()
-        self._result = func(*args)
+        try:
+            self._result = func(*args)
+        except Exception as exc:
+            Errors.add(exc)
 
 
 def launch(func, *args, **kwargs) -> Thread:

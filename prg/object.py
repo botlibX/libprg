@@ -41,6 +41,8 @@ import _thread
 
 def __dir__():
     return (
+            'Broker',
+            'Default',
             'Object',
             'construct',
             'edit',
@@ -188,6 +190,45 @@ def write(obj, pth) -> None:
         with open(pth, 'w', encoding='utf-8') as ofile:
             dump(obj, ofile)
 
+
+"broker"
+
+
+class Broker(Object):
+
+    objs = []
+
+    @staticmethod
+    def add(obj) -> None:
+        Broker.objs.append(obj)
+
+    @staticmethod
+    def announce(txt) -> None:
+        for obj in Broker.objs:
+            obj.announce(txt)
+
+    @staticmethod
+    def byorig(orig) -> Object:
+        for obj in Broker.objs:
+            if object.__repr__(obj) == orig:
+                return obj
+        return None
+
+    @staticmethod
+    def remove(obj) -> None:
+        try:
+            Broker.objs.remove(obj)
+        except ValueError:
+            pass
+
+    @staticmethod
+    def say(orig, channel, txt) -> None:
+        bot = Broker.byorig(orig)
+        if not bot:
+            return
+        bot.dosay(channel, txt)
+
+
 "utilities"
 
 
@@ -273,6 +314,22 @@ def keys(obj) -> []:
     if isinstance(obj, type({})):
         return obj.keys()
     return list(obj.__dict__.keys())
+
+
+def search(obj, selector) -> bool:
+    res = False
+    for key, value in items(selector):
+        if key not in obj:
+            res = False
+            break
+        for vval in spl(str(value)):
+            val = getattr(obj, key, None)
+            if str(vval).lower() in str(val).lower():
+                res = True
+            else:
+                res = False
+                break
+    return res
 
 
 def update(obj, data, empty=True) -> None:

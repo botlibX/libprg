@@ -120,6 +120,7 @@ def to_date(date):
 
 def mbx(event):
     if not event.args:
+        event.reply("mbx <path>")
         return
     path = os.path.expanduser(event.args[0])
     event.reply(f"reading from {path}")

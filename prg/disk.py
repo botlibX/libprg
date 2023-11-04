@@ -55,6 +55,11 @@ class Storage:
             if split in named.split(".")[-1].lower():
                 res = named
                 break
+        if "." not in res:
+            for fnm in Storage.files():
+                claz = fnm.split(".")[-1]
+                if otype == claz.lower():
+                    res = fnm
         return res
 
     @staticmethod

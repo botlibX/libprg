@@ -69,17 +69,11 @@ param.shp = ["bread", "butter", "cheese"]
 param.tdo = ["test4", ""]
 
 
+class CLI(CLI):
 
-class Event(Event):
-
-    def show(self) -> None:
-        if "v" not in Cfg.opts:
-            return
-        for txt in self.result:
-            print(txt.encode('utf-8', 'replace').decode())
-            sys.stdout.flush()
-
-
+    def dosay(self, channel, txt):
+        print(txt.encode('utf-8', 'replace').decode())
+        sys.stdout.flush()
 
 def consume(evts):
     fixed = []
@@ -105,6 +99,7 @@ def payload(clt) -> None:
         for cmnd in cmds:
             for ex in getattr(param, cmnd, [""]):
                 evt = Event()
+                evt.orig = object.__repr__(clt)
                 evt.txt = cmnd + " " + ex
                 parse(evt)
                 if "t" in Cfg.opts:

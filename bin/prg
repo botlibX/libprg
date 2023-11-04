@@ -18,7 +18,7 @@ sys.path.insert(0, os.getcwd())
 
 from prg.object import Default, Object, fmt, keys
 from prg.disk   import Storage
-from prg.errors import Censor, Errors
+from prg.error  import Censor, Errors
 from prg.find   import find
 from prg.run    import Cfg, CLI, Errors, Event, parse, scan
 
@@ -29,12 +29,11 @@ Storage.wd = os.path.expanduser("~/.prg")
 import prg.mods as mods
 
 
-class Event(Event):
+class CLI(CLI):
 
-    def show(self) -> None:
-        for txt in self.result:
-            print(txt.encode('utf-8', 'replace').decode())
-            sys.stdout.flush()
+    def dosay(self, channel, txt):
+        print(txt.encode('utf-8', 'replace').decode())
+        sys.stdout.flush()
 
 
 def wrap(func) -> None:
@@ -59,7 +58,9 @@ def main():
     if "wd" in Cfg.sets:
         Storage.wd = Cfg.wd
     scan(mods)
+    cli = CLI()
     evn = Event()
+    evn.orig = object.__repr__(cli)
     evn.txt = Cfg.otxt
     parse(evn)
     CLI.dispatch(evn)

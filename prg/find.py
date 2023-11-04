@@ -34,14 +34,14 @@ def find(mtc, selector=None, index=None) -> []:
     clz = Storage.long(mtc)
     nr = -1
     for fnm in sorted(fns(clz), key=fntime):
-        nr += 1
-        if index is not None and nr != int(index):
-            continue
         obj = Default()
         fetch(obj, fnm)
         if '__deleted__' in obj:
             continue
         if selector and not search(obj, selector):
+            continue
+        nr += 1
+        if index is not None and nr != int(index):
             continue
         yield (fnm, obj)
 
@@ -69,8 +69,6 @@ def fntime(daystr) -> float:
     timed = time.mktime(time.strptime(datestr, '%Y-%m-%d %H:%M:%S'))
     if rest:
         timed += float('.' + rest)
-    else:
-        timed = 0
     return timed
 
 
@@ -101,10 +99,10 @@ def laps(seconds, short=True) -> str:
         nrdays += weeks * 7
     if nrdays:
         txt += f"{nrdays}d"
+    if short and txt:
+        return txt.strip()
     if hours:
         txt += f"{hours}h"
-    if not nrdays and hours and short and txt:
-        return txt.strip()
     if minutes:
         txt += f"{minutes}m"
     if sec:

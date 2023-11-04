@@ -14,6 +14,14 @@ import traceback
 from .object import Object
 
 
+def __dir__():
+    return (
+        'Censor',
+        'Errors',
+        'debug'
+    )
+
+
 class Censor(Object):
 
     output = None
@@ -59,3 +67,8 @@ class Errors(Object):
     def show() -> None:
         for exc in Errors.errors:
             Errors.handle(exc)
+
+
+def debug(txt):
+    if Censor.output:
+        Censor.output(txt)

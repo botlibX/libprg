@@ -15,7 +15,8 @@ import time
 import _thread
 
 
-from .errors import Errors
+from .broker import Broker
+from .error  import Errors, debug
 from .object import Default, Object, spl
 from .disk   import Storage
 
@@ -24,7 +25,6 @@ def __dir__():
     return (
         'Cfg',
         'CLI',
-        'Errors',
         'Event',
         'lsmod',
         'parse',
@@ -33,11 +33,6 @@ def __dir__():
 
 
 "defines"
-
-
-def debug(txt):
-    if "v" in Cfg.opts:
-        print(txt)
 
 
 Cfg = Default()
@@ -49,6 +44,9 @@ Cfg = Default()
 class CLI:
 
     cmds = Object()
+
+    def __init__(self):
+        Broker.add(self)
 
     @staticmethod
     def add(func) -> None:
@@ -65,6 +63,9 @@ class CLI:
         except Exception as exc:
             Errors.add(exc)
 
+    def dosay(self, txt):
+        raise NotImplementedError("CLI.dosay")
+
     @staticmethod
     def scan(mod) -> None:
         for key, cmd in inspect.getmembers(mod, inspect.isfunction):
@@ -78,6 +79,7 @@ class Event(Default):
 
     def __init__(self):
         Default.__init__(self)
+        self.orig    = None
         self.result  = []
         self.txt     = ""
 
@@ -85,7 +87,8 @@ class Event(Default):
         self.result.append(txt)
 
     def show(self) -> None:
-        raise NotImplementedError("Event.show")
+        for txt in self.result:
+            Broker.say(self.orig, self.channel, txt)
 
 
 "utilties"

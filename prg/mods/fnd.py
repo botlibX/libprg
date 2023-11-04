@@ -35,9 +35,9 @@ def fnd(event):
             if otype == claz.lower():
                 clz = fnm
     nmr = 0
-    for fnm, obj in find(clz, event.gets):
+    for fnm, obj in find(clz, event.gets, event.index):
         lap = laps(time.time() - fntime(fnm))
-        event.reply(f"{nmr} {fmt(obj, args, plain=True)} {lap}")
+        event.reply(f"{str(nmr or event.index):4s} {lap:7s} {fmt(obj, args, plain=True):50s}")
         nmr += 1
     if not nmr:
         event.reply("no result")

@@ -23,7 +23,7 @@ sys.path.insert(0, os.getcwd())
 from prg.disk   import Storage
 from prg.find   import laps
 from prg.object import Object, keys
-from prg.run    import Cfg, CLI, Event, lsmod, parse, scan
+from prg.run    import Cfg, Commands, Event, lsmod, parse, scan
 from prg.thread import launch
 
 
@@ -69,11 +69,14 @@ param.shp = ["bread", "butter", "cheese"]
 param.tdo = ["test4", ""]
 
 
-class CLI(CLI):
+class CLI(Commands):
 
     def dosay(self, channel, txt):
+        if "v" not in Cfg.opts:
+            return
         print(txt.encode('utf-8', 'replace').decode())
         sys.stdout.flush()
+
 
 def consume(evts):
     fixed = []

@@ -28,7 +28,7 @@ from .thread import launch
 def __dir__():
     return (
         'Cfg',
-        'CLI',
+        'Commands',
         'Event',
         'lsmod',
         'parse',
@@ -72,7 +72,7 @@ class Event(Default):
 "cli"
 
 
-class CLI:
+class Commands:
 
     cmds = Object()
 
@@ -81,7 +81,7 @@ class CLI:
 
     @staticmethod
     def add(func) -> None:
-        setattr(CLI.cmds, func.__name__, func)
+        setattr(Commands.cmds, func.__name__, func)
 
     def announce(self, txt):
         pass
@@ -89,7 +89,7 @@ class CLI:
     @staticmethod
     def dispatch(evt) -> None:
         parse(evt)
-        func = getattr(CLI.cmds, evt.cmd, None)
+        func = getattr(Commands.cmds, evt.cmd, None)
         if not func:
             return
         try:
@@ -99,7 +99,7 @@ class CLI:
             Errors.add(exc)
 
     def dosay(self, txt):
-        raise NotImplementedError("CLI.dosay")
+        raise NotImplementedError("Commands.dosay")
 
     @staticmethod
     def scan(mod) -> None:
@@ -107,7 +107,7 @@ class CLI:
             if key.startswith("cb"):
                 continue
             if 'event' in cmd.__code__.co_varnames:
-                CLI.add(cmd)
+                Commands.add(cmd)
 
 
 "reactor"
@@ -184,7 +184,7 @@ def scan(pkg, mnames=None) -> []:
         module = getattr(pkg, mname, None)
         if not module:
             continue
-        CLI.scan(module)
+        Commands.scan(module)
         Storage.scan(module)
         res.append(module)
     return res

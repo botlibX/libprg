@@ -23,7 +23,7 @@ from prg.disk   import sync
 from prg.error  import Censor, debug
 from prg.find	import last
 from prg.object import Default, Object, edit, fmt, keys
-from prg.run    import Cfg, CLI, Event, Reactor
+from prg.run    import Cfg, Commands, Event, Reactor
 from prg.thread import launch
 
 
@@ -581,7 +581,7 @@ def cb_privmsg(evt):
             return
         debug(f"command from {evt.origin}: {evt.txt}")
         #parse(evt)
-        CLI.dispatch(evt)
+        Commands.dispatch(evt)
 
 
 def cb_quit(evt):

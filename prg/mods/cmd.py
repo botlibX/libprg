@@ -6,11 +6,11 @@
 "list of commands"
 
 
-from ..run import CLI
+from ..run import Commands
 
 
 "commands"
 
 
 def cmd(event):
-    event.reply(",".join(sorted(CLI.cmds)))
+    event.reply(",".join(sorted(Commands.cmds)))

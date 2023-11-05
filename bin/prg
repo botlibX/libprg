@@ -21,7 +21,7 @@ from prg.object import Default, Object, fmt, keys
 from prg.disk   import Storage
 from prg.error  import Censor, Errors
 from prg.find   import find
-from prg.run    import Cfg, CLI, Errors, Event, Reactor, forever, parse
+from prg.run    import Cfg, Commands, Errors, Event, Reactor, forever, parse
 from prg.run    import scan
 
 
@@ -47,7 +47,7 @@ except ModuleNotFoundError:
 "cli"
 
 
-class CLI(CLI):
+class CLI(Commands):
 
     def dosay(self, channel, txt):
         print(txt.encode('utf-8', 'replace').decode())
@@ -57,15 +57,14 @@ class CLI(CLI):
 "console"
 
 
-class Console(Reactor, CLI):
+class Console(Reactor):
 
     def __init__(self):
         Reactor.__init__(self)
-        CLI.__init__(self)
-        self.register("command", self.dispatch)
+        self.register("command", Commands.dispatch)
 
     def dispatch(self, evt):
-        CLI.dispatch(evt)
+        Commands.dispatch(evt)
 
     def poll(self) -> Event:
         evt = Event()

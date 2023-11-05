@@ -15,8 +15,9 @@ import threading
 import _thread
 
 
+from .broker import Broker
 from .error  import Errors
-from .object import Broker, Default, Object, spl
+from .object import Default, Object, spl
 from .disk   import Storage
 from .thread import launch
 
@@ -242,34 +243,3 @@ def parse(obj, txt=None) -> None:
         obj.txt  = obj.cmd + " " + obj.rest
     else:
         obj.txt = obj.cmd or ""
-
-
-"event"
-
-
-class Event(Default):
-
-    def __init__(self):
-        Default.__init__(self)
-        self._ready  = threading.Event()
-        self._thrs   = []
-        self.orig    = None
-        self.result  = []
-        self.txt     = ""
-
-    def ready(self):
-        self._ready.set()
-
-    def reply(self, txt) -> None:
-        self.result.append(txt)
-
-    def show(self) -> None:
-        for txt in self.result:
-            Broker.say(self.orig, self.channel, txt)
-
-    def wait(self):
-        for thr in self._thrs:
-            thr.join()
-        self._ready.wait()
-        return self.result
-

@@ -81,5 +81,5 @@ class Errors(Object):
 
 
 def debug(txt):
-    if Censor.output:
+    if Censor.output and not Censor.skip(txt):
         Censor.output(txt)

@@ -18,10 +18,11 @@ import time
 import _thread
 
 
+from prg.broker import Broker
 from prg.disk   import sync
 from prg.error  import Censor, debug
 from prg.find	import last
-from prg.object import Broker, Default, Object, edit, fmt, keys
+from prg.object import Default, Object, edit, fmt, keys
 from prg.run    import Cfg, CLI, Event, Reactor
 from prg.thread import launch
 

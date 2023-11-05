@@ -18,9 +18,10 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
+from prg.broker import Broker
 from prg.disk   import sync
 from prg.find   import find, fntime, laps, last
-from prg.object import Broker, Default, Object, fmt, update
+from prg.object import Default, Object, fmt, update
 from prg.run    import Cfg
 from prg.thread import Repeater, launch
 

@@ -9,9 +9,12 @@
 import time
 
 
-from prg.disk   import sync
-from prg.object import Object
-from prg.find   import find, fntime, laps
+from ..disk   import sync
+from ..object import Object
+from ..find   import find, fntime, laps
+
+
+"log"
 
 
 class Log(Object):
@@ -19,6 +22,9 @@ class Log(Object):
     def __init__(self):
         super().__init__()
         self.txt = ''
+
+
+"command"
 
 
 def log(event):

@@ -9,9 +9,12 @@
 import time
 
 
-from prg.disk   import sync
-from prg.object import Object
-from prg.find   import find, fntime, laps
+from ..disk   import sync
+from ..object import Object
+from ..find   import find, fntime, laps
+
+
+"todo"
 
 
 class Todo(Object):
@@ -19,6 +22,9 @@ class Todo(Object):
     def __init__(self):
         Object.__init__(self)
         self.txt = ''
+
+
+"commands"
 
 
 def dne(event):

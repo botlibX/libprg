@@ -6,7 +6,10 @@
 "list of commands"
 
 
-from prg.run import CLI
+from ..run import CLI
+
+
+"commands"
 
 
 def cmd(event):

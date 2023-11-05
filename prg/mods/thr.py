@@ -10,11 +10,17 @@ import threading
 import time
 
 
-from prg.find   import laps
-from prg.object import Object, update
+from ..find   import laps
+from ..object import Object, update
+
+
+"defines"
 
 
 STARTTIME = time.time()
+
+
+"command"
 
 
 def thr(event):

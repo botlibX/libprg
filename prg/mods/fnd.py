@@ -9,9 +9,12 @@
 import time
 
 
-from prg.object import fmt, keys
-from prg.disk   import Storage
-from prg.find   import find, fntime, laps
+from ..object import fmt, keys
+from ..disk   import Storage
+from ..find   import find, fntime, laps
+
+
+"command"
 
 
 def fnd(event):

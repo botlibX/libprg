@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # This file is placed in the Public Domain.
 #
 # pylint: disable=C0115,C0116,E0402,R0903,E1102
@@ -14,12 +13,18 @@ import traceback
 from .object import Object
 
 
+"defines"
+
+
 def __dir__():
     return (
         'Censor',
         'Errors',
         'debug'
     )
+
+
+"censor"
 
 
 class Censor(Object):
@@ -33,6 +38,9 @@ class Censor(Object):
             if skp in str(txt):
                 return True
         return False
+
+
+"errors"
 
 
 class Errors(Object):
@@ -67,6 +75,9 @@ class Errors(Object):
     def show() -> None:
         for exc in Errors.errors:
             Errors.handle(exc)
+
+
+"utilities"
 
 
 def debug(txt):

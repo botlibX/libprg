@@ -38,6 +38,36 @@ def __dir__():
 Cfg = Default()
 
 
+"event"
+
+
+class Event(Default):
+
+    def __init__(self):
+        Default.__init__(self)
+        self._ready  = threading.Event()
+        self._thrs   = []
+        self.orig    = None
+        self.result  = []
+        self.txt     = ""
+
+    def ready(self):
+        self._ready.set()
+
+    def reply(self, txt) -> None:
+        self.result.append(txt)
+
+    def show(self) -> None:
+        for txt in self.result:
+            Broker.say(self.orig, self.channel, txt)
+
+    def wait(self):
+        for thr in self._thrs:
+            thr.join()
+        self._ready.wait()
+        return self.result
+
+
 "cli"
 
 
@@ -77,36 +107,6 @@ class CLI:
                 continue
             if 'event' in cmd.__code__.co_varnames:
                 CLI.add(cmd)
-
-
-"event"
-
-
-class Event(Default):
-
-    def __init__(self):
-        Default.__init__(self)
-        self._ready  = threading.Event()
-        self._thrs   = []
-        self.orig    = None
-        self.result  = []
-        self.txt     = ""
-
-    def ready(self):
-        self._ready.set()
-
-    def reply(self, txt) -> None:
-        self.result.append(txt)
-
-    def show(self) -> None:
-        for txt in self.result:
-            Broker.say(self.orig, self.channel, txt)
-
-    def wait(self):
-        for thr in self._thrs:
-            thr.join()
-        self._ready.wait()
-        return self.result
 
 
 "reactor"
@@ -242,3 +242,34 @@ def parse(obj, txt=None) -> None:
         obj.txt  = obj.cmd + " " + obj.rest
     else:
         obj.txt = obj.cmd or ""
+
+
+"event"
+
+
+class Event(Default):
+
+    def __init__(self):
+        Default.__init__(self)
+        self._ready  = threading.Event()
+        self._thrs   = []
+        self.orig    = None
+        self.result  = []
+        self.txt     = ""
+
+    def ready(self):
+        self._ready.set()
+
+    def reply(self, txt) -> None:
+        self.result.append(txt)
+
+    def show(self) -> None:
+        for txt in self.result:
+            Broker.say(self.orig, self.channel, txt)
+
+    def wait(self):
+        for thr in self._thrs:
+            thr.join()
+        self._ready.wait()
+        return self.result
+

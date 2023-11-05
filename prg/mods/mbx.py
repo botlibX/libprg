@@ -10,8 +10,8 @@ import mailbox
 import os
 
 
-from prg.object import Object, update
-from prg.disk   import fqn, sync
+from ..object import Object, update
+from ..disk   import fqn, sync
 
 
 "defines"
@@ -48,6 +48,9 @@ monthint = {
             'Nov': 11,
             'Dec': 12
            }
+
+
+"email"
 
 
 class Email(Object):
@@ -116,6 +119,9 @@ def to_date(date):
                         except (IndexError, KeyError):
                             ddd = ""
     return ddd
+
+
+"command"
 
 
 def mbx(event):

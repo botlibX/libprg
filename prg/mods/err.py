@@ -9,6 +9,9 @@
 from ..error import Errors
 
 
+"command"
+
+
 def err(event):
     if not Errors.errors:
         event.reply("no errors")

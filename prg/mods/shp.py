@@ -9,9 +9,12 @@
 import time
 
 
-from prg.disk   import sync
-from prg.object import Object
-from prg.find   import find, fntime, laps
+from ..disk   import sync
+from ..object import Object
+from ..find   import find, fntime, laps
+
+
+"shop"
 
 
 class Shop(Object):
@@ -25,6 +28,9 @@ class Shop(Object):
 
     def length(self):
         return len(self.__dict__)
+
+
+"command"
 
 
 def got(event):

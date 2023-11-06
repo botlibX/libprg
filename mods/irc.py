@@ -18,13 +18,13 @@ import time
 import _thread
 
 
-from bot.broker import Broker
-from bot.disk   import sync
-from bot.error  import Censor, debug
-from bot.find   import last
-from bot.object import Default, Object, edit, fmt, keys
-from bot.run    import Cfg, Commands, Event, Reactor
-from bot.thread import launch
+from prg.broker import Broker
+from prg.disk   import sync
+from prg.error  import Censor, debug
+from prg.find   import last
+from prg.object import Default, Object, edit, fmt, keys
+from prg.run    import Cfg, Commands, Event, Reactor
+from prg.thread import launch
 
 
 "defines"

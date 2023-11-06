@@ -21,8 +21,8 @@ from prg.object import Default, Object, fmt, keys
 from prg.disk   import Storage
 from prg.error  import Censor, Errors
 from prg.find   import find
-from prg.run    import Cfg, Commands, Errors, Event, Reactor, forever, parse
-from prg.run    import scan
+from prg.run    import Cfg, Commands, Errors, Event, Reactor
+from prg.run    import forever, parse,  lsmod, scan
 
 
 "defines"
@@ -63,8 +63,14 @@ class Console(Reactor):
         Reactor.__init__(self)
         self.register("command", Commands.dispatch)
 
+    def announce(self, txt):
+        pass
+
     def dispatch(self, evt):
         Commands.dispatch(evt)
+
+    def dosay(self, channel, txt):
+        print(txt)
 
     def poll(self) -> Event:
         evt = Event()
@@ -101,14 +107,18 @@ def main():
     parse(Cfg, " ".join(sys.argv[1:]))
     if "wd" in Cfg.sets:
         Storage.wd = Cfg.wd
-    scan(modules)
+    if not Cfg.mod:
+        Cfg.mod = ",".join((lsmod(modules.__path__[0])))
+    if "v" in Cfg.opts:
+        dte = time.ctime(time.time()).replace("  ", " ")
+        print(f"{Cfg.name.upper()} started {dte} {Cfg.opts.upper()} {Cfg.mod.upper()}")
+    for mod in scan(modules):
+        if "i" in Cfg.opts and "init" in dir(mod):
+            mod.init()
     for mod in scan(mods, Cfg.mod):
-        if "i" in Cfg.opts:
+        if "i" in Cfg.opts and "init" in dir(mod):
             mod.init()
     if "c" in Cfg.opts:
-       if "v" in Cfg.opts:
-           dte = time.ctime(time.time()).replace("  ", " ")
-           print(f"{Cfg.name.upper()} started {dte} {Cfg.opts.upper()}")
        csl = Console()
        csl.start()
        forever()

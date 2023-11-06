@@ -35,7 +35,7 @@ Storage.wd = os.path.expanduser("~/.prg")
 "modules"
 
 
-import prg.mods as modules
+from prg import modules
 
 
 try:

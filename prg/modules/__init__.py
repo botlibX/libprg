@@ -5,4 +5,4 @@
 "modules"
 
 
-from . import cmd, err, fnd, log, mbx, mod, shp, tdo, thr
+from . import cmd, fnd, log, mod, shp, sts, tdo, thr

@@ -33,7 +33,7 @@ classifiers = [
 [tool.setuptools]
 packages = [
     'prg',
-    'prg.mods'
+    'prg.modules'
 ]
 zip-safe=true
 script-files = [

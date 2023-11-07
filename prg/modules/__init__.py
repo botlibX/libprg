@@ -2,7 +2,8 @@
 #
 #
 
-"modules"
+
+"pre imported modules"
 
 
-from . import cmd, fnd, mod, sts, thr
+from . import cmd, fnd, irc, log, mod, rss, sts, tdo, thr

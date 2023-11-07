@@ -1,6 +1,6 @@
 # This file is placed in the Public Domain.
 #
-# pylint: disable=E0402,E0602,C0116,E0401
+# pylint: disable=E0402,E0602,C0116,E0401,W0105
 
 
 "locate"
@@ -9,9 +9,8 @@
 import time
 
 
-from ..object import fmt, keys
-from ..disk   import Storage
-from ..find   import find, fntime, laps
+from ..objects import fmt, keys
+from ..storage import Storage, find, fntime, laps
 
 
 "command"

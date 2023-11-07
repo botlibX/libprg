@@ -17,12 +17,10 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from prg.object import Default, Object, fmt, keys
-from prg.disk   import Storage
-from prg.error  import Censor, Errors
-from prg.find   import find
-from prg.run    import Cfg, Commands, Errors, Event, Reactor
-from prg.run    import forever, parse,  lsmod, scan
+from prg.objects import Object
+from prg.runtime import Broker, Reactor, Storage
+from prg.runtime import Censor, Cfg, Commands, Default, Errors, Event
+from prg.runtime import forever, parse,  lsmod, scan
 
 
 "defines"
@@ -38,26 +36,10 @@ Storage.wd = os.path.expanduser("~/.prg")
 from prg import modules
 
 
-try:
-    import mods
-except ModuleNotFoundError:
-    mods = None
-
-
 "cli"
 
 
-class CLI(Commands):
-
-    def dosay(self, channel, txt):
-        print(txt.encode('utf-8', 'replace').decode())
-        sys.stdout.flush()
-
-
-"console"
-
-
-class Console(Reactor):
+class CLI(Reactor):
 
     def __init__(self):
         Reactor.__init__(self)
@@ -70,7 +52,15 @@ class Console(Reactor):
         Commands.dispatch(evt)
 
     def dosay(self, channel, txt):
-        print(txt)
+        print(txt.encode('utf-8', 'replace').decode())
+        sys.stdout.flush()
+
+
+"console"
+
+
+class Console(CLI):
+
 
     def poll(self) -> Event:
         evt = Event()
@@ -112,10 +102,7 @@ def main():
     if "v" in Cfg.opts:
         dte = time.ctime(time.time()).replace("  ", " ")
         print(f"{Cfg.name.upper()} started {dte} {Cfg.opts.upper()} {Cfg.mod.upper()}")
-    for mod in scan(modules):
-        if "i" in Cfg.opts and "init" in dir(mod):
-            mod.init()
-    for mod in scan(mods, Cfg.mod):
+    for mod in scan(modules, Cfg.mod):
         if "i" in Cfg.opts and "init" in dir(mod):
             mod.init()
     if "c" in Cfg.opts:
@@ -128,7 +115,7 @@ def main():
     evn.orig = object.__repr__(cli)
     evn.txt = Cfg.otxt
     parse(evn)
-    CLI.dispatch(evn)
+    cli.dispatch(evn)
 
 
 if __name__ == "__main__":

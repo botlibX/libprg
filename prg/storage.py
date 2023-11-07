@@ -13,7 +13,7 @@ import time
 
 
 from .objects import Object, cdir, read, write
-from .objects import Default, search, update
+from .objects import Default, fqn, ident, search, update
 
 
 "defines"
@@ -26,8 +26,6 @@ def __dir__():
         'find',
         'fns',
         'fntime',
-        'fqn',
-        'ident',
         'laps',
         'last',
         'strip',
@@ -191,13 +189,6 @@ def strip(pth, nmr=3) -> str:
 "methods"
 
 
-def fqn(obj) -> str:
-    kin = str(type(obj)).split()[-1][1:-2]
-    if kin == "type":
-        kin = obj.__name__
-    return kin
-
-
 def fetch(obj, pth) -> None:
     pth2 = Storage.store(pth)
     read(obj, pth2)
@@ -215,13 +206,6 @@ def last(obj, selector=None) -> None:
         inp = result[-1]
         update(obj, inp[-1])
         return inp[0]
-
-
-def ident(obj) -> str:
-    return os.path.join(
-                        fqn(obj),
-                        os.path.join(*str(datetime.datetime.now()).split())
-                       )
 
 
 def sync(obj, pth=None) -> str:

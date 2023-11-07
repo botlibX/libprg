@@ -30,6 +30,7 @@ this package is a Work In Progress (WIP).
 """
 
 
+import datetime
 import os
 import pathlib
 import json
@@ -46,6 +47,8 @@ def __dir__():
             'construct',
             'edit',
             'fmt',
+            'fqn',
+            'ident',
             'items',
             'keys',
             'read',
@@ -263,6 +266,20 @@ def fmt(obj, args=None, skip=None, plain=False) -> str:
         else:
             txt += f'{key}={value} '
     return txt.strip()
+
+
+def fqn(obj) -> str:
+    kin = str(type(obj)).split()[-1][1:-2]
+    if kin == "type":
+        kin = obj.__name__
+    return kin
+
+
+def ident(obj) -> str:
+    return os.path.join(
+                        fqn(obj),
+                        os.path.join(*str(datetime.datetime.now()).split())
+                       )
 
 
 def items(obj) -> []:

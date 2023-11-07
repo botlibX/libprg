@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "libprg"
 description = "program library"
-version = "3"
+version = "5"
 authors = [
     {name = "libprg",email = "libbotx@gmail.com"},
 ]
@@ -33,18 +33,43 @@ classifiers = [
 [tool.setuptools]
 packages = [
     'prg',
-    'prg.modules'
 ]
 zip-safe=true
-script-files = [
-    "bin/prg",
-]
 
 
 [tool.setuptools.data-files]
 "share/doc/libprg" = [
     "README.rst",
 ]
+
+
+[tool.setuptools.data-files]
+"share/doc/libbot" = [
+    "README.rst",
+]
+
+
+"libbot/modules" = [
+    'modules/__init__.py',
+    'modules/cmd.py',
+    'modules/fnd.py',
+    'modules/irc.py',
+    'modules/log.py',
+    'modules/mbx.py',
+    'modules/mdl.py',
+    'modules/mod.py'.
+    'modules/mod.py',
+    'modules/req.py',
+    'modules/rss.py',
+    'modules/shp.py',
+    'modules/sts.py',
+    'modules/tdo.py',
+    'modules/thr.py',
+    'modules/udp.py',
+    'modules/wsd.py',
+    'modules/wsh.py'
+]
+
 
 [tool.setuptools.exclude-package-data]
 "*" = [

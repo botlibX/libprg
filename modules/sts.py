@@ -6,7 +6,10 @@
 "status of bots"
 
 
-from ..runtime import Broker, Errors
+from prg.runtime import Broker, Errors
+
+
+"commands"
 
 
 def sts(event):

@@ -9,8 +9,8 @@
 import time
 
 
-from ..objects import fmt, keys
-from ..storage import Storage, find, fntime, laps
+from prg.objects import fmt, keys
+from prg.storage import Storage, find, fntime, laps
 
 
 "command"

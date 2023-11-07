@@ -10,8 +10,8 @@ import threading
 import time
 
 
-from ..storage import laps
-from ..objects import Object, update
+from prg.storage import laps
+from prg.objects import Object, update
 
 
 "defines"

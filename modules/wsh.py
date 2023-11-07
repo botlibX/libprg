@@ -9,8 +9,11 @@
 import time
 
 
-from ..disk   import find, fntime, sync
-from ..object import Object
+from prg.storage import find, fntime, sync
+from prg.objects import Object
+
+
+"wishes"
 
 
 class Wish(Object):
@@ -24,6 +27,9 @@ class Wish(Object):
 
     def settxt(self, txt):
         self.txt = txt
+
+
+"commands"
 
 
 def ful(event):

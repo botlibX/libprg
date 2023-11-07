@@ -11,9 +11,9 @@ import datetime
 import time
 
 
-from ..objects import Object, construct, keys
-from ..runtime import Broker, Event, Repeater, launch
-from ..storage import laps 
+from prg.objects import Object, construct, keys
+from prg.runtime import Broker, Event, Repeater, launch
+from prg.storage import laps 
 
 
 def __dir__():

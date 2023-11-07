@@ -12,9 +12,9 @@ import sys
 import time
 
 
-from ..objects import Object
-from ..runtime import Broker, launch
-from ..storage import last
+from prg.objects import Object
+from prg.runtime import Broker, launch
+from prg.storage import last
 
 
 "defines"

@@ -13,6 +13,9 @@ from ..objects import Object
 from ..storage import find, fntime, laps, sync
 
 
+"shop"
+
+
 class Shop(Object):
 
     def __init__(self):
@@ -24,6 +27,9 @@ class Shop(Object):
 
     def length(self):
         return len(self.__dict__)
+
+
+"commands"
 
 
 def got(event):

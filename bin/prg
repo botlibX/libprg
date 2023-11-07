@@ -9,6 +9,7 @@
 
 import inspect
 import os
+import readline
 import sys
 import termios
 import time
@@ -32,8 +33,10 @@ Storage.wd = os.path.expanduser("~/.prg")
 
 "modules"
 
-
-from prg import modules
+if os.path.exists("modules"):
+    import modules
+else:
+    modules = None    
 
 
 "cli"

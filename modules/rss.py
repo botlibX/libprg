@@ -18,9 +18,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from ..objects import Default, Object, fmt, update
-from ..runtime import Broker, Cfg, Repeater, launch
-from ..storage import find, fntime, laps, last, sync
+from prg.objects import Default, Object, fmt, update
+from prg.runtime import Broker, Cfg, Repeater, launch
+from prg.storage import find, fntime, laps, last, sync
 
 
 "defines"

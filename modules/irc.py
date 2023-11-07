@@ -18,10 +18,10 @@ import time
 import _thread
 
 
-from ..objects import Default, Object, edit, fmt, keys
-from ..runtime import Broker, Censor, Cfg, Commands, Event, Reactor
-from ..runtime import debug, launch
-from ..storage import last, sync
+from prg.objects import Default, Object, edit, fmt, keys
+from prg.runtime import Broker, Censor, Cfg, Commands, Event, Reactor
+from prg.runtime import debug, launch
+from prg.storage import last, sync
 
 
 "defines"

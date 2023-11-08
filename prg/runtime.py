@@ -252,6 +252,25 @@ class Reactor(Object):
         self.stopped.set()
 
 
+"cli"
+
+
+class CLI(Reactor):
+
+    def __init__(self):
+        Reactor.__init__(self)
+        self.register("command", Commands.dispatch)
+
+    def announce(self, txt):
+        pass
+
+    def dispatch(self, evt):
+        Commands.dispatch(evt)
+
+    def dosay(self, channel, txt):
+        raise NotImplementedError("CLI.dosay")
+
+
 "thread"
 
 

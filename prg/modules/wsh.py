@@ -1,6 +1,6 @@
 # This file is placed in the Public Domain.
 #
-# pylint: disable=C0115,C0116,W0612,E0602,E0402
+# pylint: disable=C0115,C0116,W0612,E0602,E0402,W0105
 
 
 "wish list"

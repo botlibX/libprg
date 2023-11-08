@@ -1,6 +1,6 @@
 # This file is placed in the Public Domain.
 #
-#
+# pylint: disable=E0603,E0402,W0401
 
 
 "specifications"
@@ -15,8 +15,8 @@ def __dir__():
     return (
         'Broker',
         'Censor',
-        'Cfg',
         'Commands',
+        'Cfg',
         'Default',
         'Errors',
         'Event',

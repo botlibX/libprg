@@ -27,7 +27,7 @@ from ..storage import last, sync
 "defines"
 
 
-NAME = Cfg.name or "obj"
+NAME = Cfg.name or __file__.split(os.sep)[-3].lower()
 
 
 Censor.words = ["PING", "PONG", "PRIVMSG"]

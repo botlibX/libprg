@@ -9,8 +9,8 @@
 import time
 
 
-from prg.storage import find, fntime, sync
-from prg.objects import Object
+from ..storage import find, fntime, sync
+from ..objects import Object
 
 
 "wishes"

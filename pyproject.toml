@@ -38,36 +38,8 @@ zip-safe=true
 
 
 [tool.setuptools.data-files]
-"share/doc/libprg" = [
-    "README.rst",
-]
-
-
-[tool.setuptools.data-files]
 "share/doc/libbot" = [
     "README.rst",
-]
-
-
-"libbot/modules" = [
-    'modules/__init__.py',
-    'modules/cmd.py',
-    'modules/fnd.py',
-    'modules/irc.py',
-    'modules/log.py',
-    'modules/mbx.py',
-    'modules/mdl.py',
-    'modules/mod.py'.
-    'modules/mod.py',
-    'modules/req.py',
-    'modules/rss.py',
-    'modules/shp.py',
-    'modules/sts.py',
-    'modules/tdo.py',
-    'modules/thr.py',
-    'modules/udp.py',
-    'modules/wsd.py',
-    'modules/wsh.py'
 ]
 
 

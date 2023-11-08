@@ -10,8 +10,8 @@ import mailbox
 import os
 
 
-from prg.storage import fqn, sync
-from prg.objects import Object, update
+from ..storage import fqn, sync
+from ..objects import Object, update
 
 
 "defines"

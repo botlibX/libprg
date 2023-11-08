@@ -6,7 +6,7 @@
 "status of bots"
 
 
-from prg.runtime import Broker, Errors
+from ..runtime import Broker, Errors
 
 
 "commands"

@@ -6,7 +6,7 @@
 "list of commands"
 
 
-from prg.runtime import Commands
+from ..runtime import Commands
 
 
 "commands"

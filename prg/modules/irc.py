@@ -18,16 +18,16 @@ import time
 import _thread
 
 
-from prg.objects import Default, Object, edit, fmt, keys
-from prg.runtime import Broker, Censor, Cfg, Commands, Event, Reactor
-from prg.runtime import debug, launch
-from prg.storage import last, sync
+from ..objects import Default, Object, edit, fmt, keys
+from ..runtime import Broker, Censor, Cfg, Commands, Event, Reactor
+from ..runtime import debug, launch
+from ..storage import last, sync
 
 
 "defines"
 
 
-NAME = Cfg.name or __file__.split(os.sep)[-3]
+NAME = Cfg.name or "obj"
 
 
 Censor.words = ["PING", "PONG", "PRIVMSG"]

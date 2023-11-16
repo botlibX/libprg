@@ -2,6 +2,7 @@
 #
 # pylint: disable=C,R,W0201,W0212,W0105,W0613,W0406
 
+
 "program"
 
 
@@ -12,8 +13,8 @@ import termios
 import time
 
 
-from prg import Censor, CLI, Commands, Default, Errors, Event, Storage
-from prg import command, forever, parse, lsmod, modules, scan
+from . import Censor, CLI, Commands, Default, Errors, Event, Storage
+from . import command, forever, parse, lsmod, modules, scan
 
 
 cfg = Default()
@@ -31,7 +32,6 @@ class CLI(CLI):
 
 
 class Console(CLI):
-
 
     def poll(self) -> Event:
         evt = Event()
@@ -65,9 +65,9 @@ def wrap(func) -> None:
 
 
 def main():
+    Censor.output = print
     parse(cfg, " ".join(sys.argv[1:]))
     if isop("v"):
-        Censor.output = print
         dte = time.ctime(time.time()).replace("  ", " ")
         print(f"{cfg.name.upper()} started {cfg.opts.upper()} started {dte}")
     cfg.mod = ",".join((lsmod(modules.__path__[0])))
@@ -86,8 +86,9 @@ def main():
 
 def wrapped():
     wrap(main)
+    Errors.show()
+
 
 if __name__ == "__main__":
     wrapped()
-    Errors.show()
         

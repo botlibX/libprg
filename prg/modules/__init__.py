@@ -6,4 +6,4 @@
 "preimport"
 
 
-from . import cmd, err, irc, log, mod, rss, shp, tdo, thr
+from . import cmd, dbg, err, irc, log, mod, rss, shp, tdo, thr

@@ -17,11 +17,9 @@ import time
 import _thread
 
 
-from ..disk   import find, fntime, laps, last, sync
-from ..error  import Censor, Errors, debug
-from ..object import Default, Object, edit, fmt, keys
-from ..run    import Broker, Commands, Event, Reactor, command
-from ..thread import launch
+from .. import Broker, Censor, Commands, Default, Errors, Event, Object, Reactor
+from .. import debug, edit, find, fmt, fntime, keys, laps, last, sync
+from .. import command, launch
 
 
 NAME = "prg"

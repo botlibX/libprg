@@ -6,11 +6,9 @@
 "specifications"
 
 
-from .disk   import *
-from .error  import *
-from .object import *
-from .run    import *
-from .thread import *
+from .storage import *
+from .objects import *
+from .runtime import *
 
 
 def __dir__():

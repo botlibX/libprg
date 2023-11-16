@@ -14,8 +14,8 @@ import time
 import _thread
 
 
-from .object import Object, Default, dump, fqn, items, load, update
-from .parse  import spl
+from .objects import Object, Default, dump, fqn, items, load, update
+from .parsing  import spl
 
 
 lock = _thread.allocate_lock()

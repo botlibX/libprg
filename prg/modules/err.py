@@ -9,6 +9,9 @@
 from .. import Broker, Errors
 
 
+DEBUG = False
+
+
 def err(event):
     nmr = 0
     for bot in Broker.objs:
@@ -19,5 +22,6 @@ def err(event):
         event.reply("no status")
     if not Errors.errors:
         event.reply("no errors")
-    for exc in Errors.errors:
-        event.reply(Errors.format(exc))
+    if DEBUG:
+        for exc in Errors.errors:
+            event.reply(Errors.format(exc))

@@ -12,6 +12,7 @@ import queue
 import threading
 import time
 import traceback
+import types
 import _thread
 
 
@@ -34,6 +35,69 @@ def __dir__():
         'forever',
         'scan'
     )
+
+
+class Reactor(Object):
+
+    def __init__(self):
+        Object.__init__(self)
+        self.cbs      = Object()
+        self.queue    = queue.Queue()
+        self.stopped  = threading.Event()
+        self.threaded = True
+        Broker.add(self)
+
+    def dispatch(self, evt) -> None:
+        func = getattr(self.cbs, evt.type, None)
+        if not func:
+            evt.ready()
+            return
+        if self.threaded:
+            evt._thrs.append(launch(func, evt))
+        else:
+            try:
+                func(evt)
+            except Exception as ex:
+                Errors.add(ex)
+
+    def loop(self) -> None:
+        while not self.stopped.is_set():
+            try:
+                self.dispatch(self.poll())
+            except (KeyboardInterrupt, EOFError):
+                _thread.interrupt_main()
+
+    def poll(self):
+        return self.queue.get()
+
+    def put(self, evt) -> None:
+        self.queue.put_nowait(evt)
+
+    def register(self, typ, cbs) -> None:
+        setattr(self.cbs, typ, cbs)
+
+    def start(self) -> None:
+        launch(self.loop)
+
+    def stop(self) -> None:
+        self.stopped.set()
+
+
+
+class CLI(Reactor):
+
+    def __init__(self):
+        Reactor.__init__(self)
+        self.register("command", Commands.dispatch)
+
+    def announce(self, txt):
+        pass
+
+    def dispatch(self, evt):
+        return Commands.dispatch(evt)
+
+    def say(self, channel, txt):
+        raise NotImplementedError("CLI.say")
 
 
 class Event(Default):
@@ -140,68 +204,6 @@ class Commands(Object):
                 Commands.add(cmd)
 
 
-class Reactor(Object):
-
-    def __init__(self):
-        Object.__init__(self)
-        self.cbs      = Object()
-        self.queue    = queue.Queue()
-        self.stopped  = threading.Event()
-        self.threaded = True
-        Broker.add(self)
-
-    def dispatch(self, evt) -> None:
-        func = getattr(self.cbs, evt.type, None)
-        if not func:
-            evt.ready()
-            return
-        if self.threaded:
-            evt._thrs.append(launch(func, evt))
-        else:
-            try:
-                func(evt)
-            except Exception as ex:
-                Errors.add(ex)
-
-    def loop(self) -> None:
-        while not self.stopped.is_set():
-            try:
-                self.dispatch(self.poll())
-            except (KeyboardInterrupt, EOFError):
-                _thread.interrupt_main()
-
-    def poll(self) -> Event:
-        return self.queue.get()
-
-    def put(self, evt) -> None:
-        self.queue.put_nowait(evt)
-
-    def register(self, typ, cbs) -> None:
-        setattr(self.cbs, typ, cbs)
-
-    def start(self) -> None:
-        launch(self.loop)
-
-    def stop(self) -> None:
-        self.stopped.set()
-
-
-class CLI(Reactor):
-
-    def __init__(self):
-        Reactor.__init__(self)
-        self.register("command", Commands.dispatch)
-
-    def announce(self, txt):
-        pass
-
-    def dispatch(self, evt):
-        return Commands.dispatch(evt)
-
-    def say(self, channel, txt):
-        raise NotImplementedError("CLI.say")
-
-
 class Censor(Object):
 
     output = None
@@ -218,6 +220,7 @@ class Censor(Object):
 class Errors(Object):
 
     errors = []
+    shown  = []
 
     @staticmethod
     def add(exc) -> None:
@@ -241,72 +244,15 @@ class Errors(Object):
     @staticmethod
     def handle(exc) -> None:
         if Censor.output:
-            Censor.output(Errors.format(exc))
+            txt = str(Errors.format(exc))
+            if txt not in Errors.shown:
+                Censor.output(txt)
+                Errors.shown.append(txt)
 
     @staticmethod
     def show() -> None:
         for exc in Errors.errors:
             Errors.handle(exc)
-
-
-def command(txt, clt=None):
-    cli = clt or CLI()
-    evn = Event()
-    evn.orig = object.__repr__(cli)
-    evn.txt = txt
-    parse(evn)
-    cli.dispatch(evn)
-    evn.wait()
-    return evn
-
-
-def debug(txt):
-    if Censor.output and not Censor.skip(txt):
-        Censor.output(txt)
-
-
-def forever():
-    while 1:
-        try:
-            time.sleep(1.0)
-        except:
-            _thread.interrupt_main()
-
-
-def scan(pkg, mnames, init=False, wait=False) -> []:
-    res = []
-    if not pkg:
-        return res
-    for mname in spl(mnames):
-        module = getattr(pkg, mname, None)
-        if not module:
-            continue
-        Commands.scan(module)
-        Storage.scan(module)
-        res.append(module)
-        if init and "init" in dir(module):
-            module._thr = launch(module.init)
-    if wait:
-        for mod in res:
-            if "_thr" not in dir(mod):
-                continue
-            mod._thr.join()
-    return res
-# This file is placed in the Public Domain.
-#
-# pylint: disable=C,R,W0212,E0402,W0105 W0718,W0702,E1102,W0246
-
-
-"threads"
-
-
-import queue
-import threading
-import time
-import types
-
-
-from .runtime import Errors
 
 
 class Thread(threading.Thread):
@@ -389,6 +335,30 @@ class Repeater(Timer):
         return thr
 
 
+def command(txt, clt=None):
+    cli = clt or CLI()
+    evn = Event()
+    evn.orig = object.__repr__(cli)
+    evn.txt = txt
+    parse(evn)
+    cli.dispatch(evn)
+    evn.wait()
+    return evn
+
+
+def debug(txt):
+    if Censor.output and not Censor.skip(txt):
+        Censor.output(txt)
+
+
+def forever():
+    while 1:
+        try:
+            time.sleep(1.0)
+        except:
+            _thread.interrupt_main()
+
+
 def launch(func, *args, **kwargs) -> Thread:
     nme = kwargs.get("name", name(func))
     thread = Thread(func, nme, *args, **kwargs)
@@ -409,3 +379,24 @@ def name(obj) -> str:
     if '__name__' in dir(obj):
         return f'{obj.__class__.__name__}.{obj.__name__}'
     return None
+
+
+def scan(pkg, mnames, init=False, wait=False) -> []:
+    res = []
+    if not pkg:
+        return res
+    for mname in spl(mnames):
+        module = getattr(pkg, mname, None)
+        if not module:
+            continue
+        Commands.scan(module)
+        Storage.scan(module)
+        res.append(module)
+        if init and "init" in dir(module):
+            module._thr = launch(module.init)
+    if wait:
+        for mod in res:
+            if "_thr" not in dir(mod):
+                continue
+            mod._thr.join()
+    return res

@@ -20,18 +20,17 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from prg.disk   import Storage, laps, lsmod
-from prg.error  import Censor
-from prg.object import Default, Object, keys
-from prg.run    import CLI, Commands, Errors, Event
-from prg.run    import parse, scan
-from prg.thread import launch
+from prg.storage import Storage, laps, lsmod
+from prg.objects import Default, Object, keys
+from prg.runtime import Censor, CLI, Commands, Errors, Event
+from prg.runtime import launch, parse, scan
 
 
 from prg import modules
 
 
 STARTTIME = time.time()
+
 
 Cfg = Default()
 Cfg.debug = True

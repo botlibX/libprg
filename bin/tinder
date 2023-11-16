@@ -20,18 +20,20 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from prg.objects import Object, keys
-from prg.storage import Storage, laps
-from prg.runtime import Censor, Cfg, CLI, Commands, Event
-from prg.runtime import launch, lsmod, parse, scan
-
-
-STARTTIME = time.time()
+from prg.disk   import Storage, laps, lsmod
+from prg.error  import Censor
+from prg.object import Default, Object, keys
+from prg.run    import CLI, Commands, Errors, Event
+from prg.run    import parse, scan
+from prg.thread import launch
 
 
 from prg import modules
 
 
+STARTTIME = time.time()
+
+Cfg = Default()
 Cfg.debug = True
 Cfg.mod = ",".join(lsmod(modules.__path__[0]))
 Cfg.name = "tinder"
@@ -70,7 +72,9 @@ param.tdo = ["test4", ""]
 
 class CLI(CLI):
 
-    def dosay(self, channel, txt):
+    def say(self, channel, txt):
+        if "v" not in Cfg.opts:
+            return
         print(txt.encode('utf-8', 'replace').decode())
         sys.stdout.flush()
 
@@ -127,10 +131,11 @@ def wrap(func) -> None:
 
 
 def main() -> None:
-    Censor.output = print
     if os.path.exists(Storage.wd):
         shutil.rmtree(Storage.wd)
     parse(Cfg, " ".join(sys.argv[1:]))
+    if "v" in Cfg.opts:
+        Censor.output = print
     scan(modules, Cfg.mod)
     nrs = Cfg.index or 1
     cli = CLI()
@@ -149,3 +154,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     wrap(main)
+    Errors.show()

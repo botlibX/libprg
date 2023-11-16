@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "libprg"
 description = "program library"
-version = "5"
+version = "6"
 authors = [
     {name = "libprg",email = "libbotx@gmail.com"},
 ]
@@ -22,6 +22,10 @@ classifiers = [
     'Programming Language :: Python',
     'Topic :: Utilities'
 ]
+
+
+[project.scripts]
+"prg" = "prg.__main__:wrapped"
 
 
 [project.urls]

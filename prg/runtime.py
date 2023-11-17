@@ -6,28 +6,24 @@
 "runtime"
 
 
-import inspect
-import io
 import queue
 import threading
 import time
-import traceback
-import types
 import _thread
 
 
-from .storage import Storage, spl
+from .brokers import Broker
+from .command import Commands
+from .excepts import Censor, Errors
+from .parsers import parse
 from .objects import Default, Object
+from .storage import Storage, spl
+from .threads import launch
 
 
 def __dir__():
     return (
-        'Broker',
-        'Censor',
-        'Cfg',
-        'Commands',
-        'Config',
-        'Errors',
+        'CLI',
         'Event',
         'Reactor',
         'command',
@@ -125,215 +121,6 @@ class Event(Default):
         return self.result
 
 
-class Broker(Object):
-
-    objs = []
-
-    @staticmethod
-    def add(obj) -> None:
-        Broker.objs.append(obj)
-
-    @staticmethod
-    def announce(txt) -> None:
-        for obj in Broker.objs:
-            if "announce" in dir(obj):
-                obj.announce(txt)
-
-    @staticmethod
-    def byorig(orig) -> Object:
-        for obj in Broker.objs:
-            if object.__repr__(obj) == orig:
-                return obj
-        return None
-
-    @staticmethod
-    def remove(obj) -> None:
-        try:
-            Broker.objs.remove(obj)
-        except ValueError:
-            pass
-
-    @staticmethod
-    def say(orig, channel, txt) -> None:
-        bot = Broker.byorig(orig)
-        if not bot:
-            return
-        bot.say(channel, txt)
-
-
-class Commands(Object):
-
-    cmds = Object()
-
-    def __init__(self):
-        Object.__init__(self)
-        Broker.add(self)
-
-    @staticmethod
-    def add(func) -> None:
-        setattr(Commands.cmds, func.__name__, func)
-
-    def announce(self, txt):
-        pass
-
-    @staticmethod
-    def dispatch(evt) -> None:
-        parse(evt)
-        func = getattr(Commands.cmds, evt.cmd, None)
-        if not func:
-            evt.ready()
-            return
-        try:
-            func(evt)
-            evt.show()
-        except Exception as exc:
-            Errors.add(exc)
-        evt.ready()
- 
-    def say(self, txt):
-        raise NotImplementedError("Commands.say")
-
-    @staticmethod
-    def scan(mod) -> None:
-        for key, cmd in inspect.getmembers(mod, inspect.isfunction):
-            if key.startswith("cb"):
-                continue
-            if 'event' in cmd.__code__.co_varnames:
-                Commands.add(cmd)
-
-
-class Censor(Object):
-
-    output = None
-    words = []
-
-    @staticmethod
-    def skip(txt) -> bool:
-        for skp in Censor.words:
-            if skp in str(txt):
-                return True
-        return False
-
-
-class Errors(Object):
-
-    errors = []
-    shown  = []
-
-    @staticmethod
-    def add(exc) -> None:
-        excp = exc.with_traceback(exc.__traceback__)
-        Errors.errors.append(excp)
-
-    @staticmethod
-    def format(exc) -> str:
-        res = ""
-        stream = io.StringIO(
-                             traceback.print_exception(
-                                                       type(exc),
-                                                       exc,
-                                                       exc.__traceback__
-                                                      )
-                            )
-        for line in stream.readlines():
-            res += line + "\n"
-        return res
-
-    @staticmethod
-    def handle(exc) -> None:
-        if Censor.output:
-            txt = str(Errors.format(exc))
-            if txt not in Errors.shown:
-                Censor.output(txt)
-                Errors.shown.append(txt)
-
-    @staticmethod
-    def show() -> None:
-        for exc in Errors.errors:
-            Errors.handle(exc)
-
-
-class Thread(threading.Thread):
-
-    def __init__(self, func, thrname, *args, daemon=True, **kwargs):
-        ""
-        super().__init__(None, self.run, thrname, (), {}, daemon=daemon)
-        self._result   = None
-        self.name      = thrname or name(func)
-        self.queue     = queue.Queue()
-        self.sleep     = None
-        self.starttime = time.time()
-        self.queue.put_nowait((func, args))
-
-    def __iter__(self):
-        ""
-        return self
-
-    def __next__(self):
-        ""
-        for k in dir(self):
-            yield k
-
-    def join(self, timeout=None) -> type:
-        ""
-        super().join(timeout)
-        return self._result
-
-    def run(self) -> None:
-        ""
-        func, args = self.queue.get()
-        try:
-            self._result = func(*args)
-        except Exception as exc:
-            Errors.add(exc)
-            if args:
-                args[0].ready()
-
-
-class Timer:
-
-    def __init__(self, sleep, func, *args, thrname=None):
-        ""
-        self.args  = args
-        self.func  = func
-        self.sleep = sleep
-        self.name  = thrname or str(self.func).split()[2]
-        self.state = {}
-        self.timer = None
-
-    def run(self) -> None:
-        ""
-        self.state["latest"] = time.time()
-        launch(self.func, *self.args)
-
-    def start(self) -> None:
-        ""
-        timer = threading.Timer(self.sleep, self.run)
-        timer.name   = self.name
-        timer.daemon = True
-        timer.sleep  = self.sleep
-        timer.state  = self.state
-        timer.func   = self.func
-        timer.state["starttime"] = time.time()
-        timer.state["latest"]    = time.time()
-        timer.start()
-        self.timer   = timer
-
-    def stop(self) -> None:
-        ""
-        if self.timer:
-            self.timer.cancel()
-
-
-class Repeater(Timer):
-
-    def run(self) -> Thread:
-        ""
-        thr = launch(self.start)
-        super().run()
-        return thr
-
-
 def command(txt, clt=None):
     cli = clt or CLI()
     evn = Event()
@@ -358,80 +145,6 @@ def forever():
             _thread.interrupt_main()
 
 
-def launch(func, *args, **kwargs) -> Thread:
-    nme = kwargs.get("name", name(func))
-    thread = Thread(func, nme, *args, **kwargs)
-    thread.start()
-    return thread
-
-
-def name(obj) -> str:
-    typ = type(obj)
-    if isinstance(typ, types.ModuleType):
-        return obj.__name__
-    if '__self__' in dir(obj):
-        return f'{obj.__self__.__class__.__name__}.{obj.__name__}'
-    if '__class__' in dir(obj) and '__name__' in dir(obj):
-        return f'{obj.__class__.__name__}.{obj.__name__}'
-    if '__class__' in dir(obj):
-        return f"{obj.__class__.__module__}.{obj.__class__.__name__}"
-    if '__name__' in dir(obj):
-        return f'{obj.__class__.__name__}.{obj.__name__}'
-    return None
-
-
-def parse(obj, txt=None) -> None:
-    args = []
-    obj.args    = obj.args or []
-    obj.cmd     = obj.cmd or ""
-    obj.gets    = obj.gets or Default()
-    obj.hasmods = obj.hasmod or False
-    obj.index   = None
-    obj.mod     = obj.mod or ""
-    obj.opts    = obj.opts or ""
-    obj.result  = obj.reult or []
-    obj.sets    = obj.sets or Default()
-    obj.otxt    = txt or obj.txt or ""
-    _nr = -1
-    for spli in obj.otxt.split():
-        if spli.startswith("-"):
-            try:
-                obj.index = int(spli[1:])
-            except ValueError:
-                obj.opts += spli[1:]
-            continue
-        if "==" in spli:
-            key, value = spli.split("==", maxsplit=1)
-            if key in obj.gets:
-                val = getattr(obj.gets, key)
-                value = val + "," + value
-            setattr(obj.gets, key, value)
-            continue
-        if "=" in spli:
-            key, value = spli.split("=", maxsplit=1)
-            if key == "mod":
-                obj.hasmods = True
-                if obj.mod:
-                    obj.mod += f",{value}"
-                else:
-                    obj.mod = value
-                continue
-            setattr(obj.sets, key, value)
-            continue
-        _nr += 1
-        if _nr == 0:
-            obj.cmd = spli
-            continue
-        args.append(spli)
-    if args:
-        obj.args = args
-        obj.txt  = obj.cmd or ""
-        obj.rest = " ".join(obj.args)
-        obj.txt  = obj.cmd + " " + obj.rest
-    else:
-        obj.txt = obj.cmd or ""
-
-
 def scan(pkg, mnames, init=False, wait=False) -> []:
     res = []
     if not pkg:
@@ -451,11 +164,3 @@ def scan(pkg, mnames, init=False, wait=False) -> []:
                 continue
             mod._thr.join()
     return res
-
-
-def spl(txt) -> []:
-    try:
-        res = txt.split(',')
-    except (TypeError, ValueError):
-        res = txt
-    return [x for x in res if x]

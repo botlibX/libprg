@@ -13,6 +13,7 @@ DEBUG = False
 
 
 def err(event):
+    print(event)
     nmr = 0
     for bot in Broker.objs:
         if 'state' in dir(bot):
@@ -22,6 +23,8 @@ def err(event):
         event.reply("no status")
     if not Errors.errors:
         event.reply("no errors")
-    if DEBUG:
+    if not DEBUG:
         for exc in Errors.errors:
-            event.reply(Errors.format(exc))
+            txt = Errors.format(exc)
+            for line in txt.split():
+                event.reply(line)

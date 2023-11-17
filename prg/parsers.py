@@ -6,6 +6,9 @@
 "parsers"
 
 
+from .objects import Default
+
+
 def parse(obj, txt=None) -> None:
     args = []
     obj.args    = obj.args or []

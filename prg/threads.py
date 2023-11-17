@@ -12,6 +12,9 @@ import time
 import types
 
 
+from .excepts import Errors
+
+
 class Thread(threading.Thread):
 
     def __init__(self, func, thrname, *args, daemon=True, **kwargs):

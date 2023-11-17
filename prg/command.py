@@ -10,7 +10,9 @@ import inspect
 
 
 from .brokers import Broker
+from .excepts import Errors
 from .objects import Object
+from .parsers import parse
 
 
 class Commands(Object):

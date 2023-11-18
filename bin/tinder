@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+#
+# pylint: disable=C0115,C0116,C0413,E0401,R0903,E0611,C0412,C0103,W0702,R0402
+# pylint: disable=W0718,W0611,W0613,E0102
+
+
+"created clients"
+
+
+import os
+import random
+import shutil
+import sys
+import termios
+import time
+import _thread
+
+
+sys.path.insert(0, os.getcwd())
+
+
+from obj import Censor, CLI, Commands, Default, Message, Object, Storage
+from obj import keys, laps, launch, lsmod, parse, scan
+
+
+if os.path.exists("mods"):
+    import mods as modules
+else:
+    modules = None
+
+
+STARTTIME = time.time()
+
+
+Cfg = Default()
+Cfg.debug = True
+Cfg.mod = ",".join(lsmod(modules.__path__[0]))
+Cfg.name = "tinder"
+Cfg.silent = False
+Cfg.skip = ["debug",]
+
+
+Storage.wd = ".test"
+
+
+paylock = _thread.allocate_lock()
+outlock = _thread.allocate_lock()
+
+
+errors = []
+events = []
+
+
+param = Object()
+param.cfg = ["server=localhost", ""]
+param.cmd = [""]
+param.fnd = [
+             'log',
+             "config",
+             "todo",
+             "rss",
+             "todo txt==test",
+             "config server==localhost",
+             "rss rss==reddit"
+            ]
+param.log = ["test1", ""]
+param.mod = [""]
+param.shp = ["bread", "butter", "cheese"]
+param.tdo = ["test4", ""]
+
+
+class CLI(CLI):
+
+    threaded = True
+
+    def say(self, channel, txt):
+        if "v" not in Cfg.opts:
+            return
+        print(txt.encode('utf-8', 'replace').decode())
+        sys.stdout.flush()
+
+
+def consume(evts):
+    fixed = []
+    res = []
+    for evt in evts:
+        res.append(evt.wait())
+        if not evt.result:
+            print(f"no result for {evt.cmd}")
+        fixed.append(evt)
+    for fff in fixed:
+        try:
+            evts.remove(fff)
+        except ValueError:
+            continue
+    return res
+
+
+def payload(clt) -> None:
+    cmds = list(keys(Commands.cmds))
+    random.shuffle(cmds)
+    with paylock:
+        nmr = 0
+        for cmnd in cmds:
+            for ex in getattr(param, cmnd, [""]):
+                evt = Message()
+                evt.orig = object.__repr__(clt)
+                evt.txt = cmnd + " " + ex
+                parse(evt)
+                if "t" in Cfg.opts:
+                    clt.put(evt)
+                    events.append(evt)
+                else:
+                    clt.dispatch(evt)
+                nmr += 1
+        return nmr
+
+
+def wrap(func) -> None:
+    old2 = None
+    try:
+        old2 = termios.tcgetattr(sys.stdin.fileno())
+    except termios.error:
+        pass
+    try:
+        func()
+    except (KeyboardInterrupt, EOFError):
+        print("")
+    finally:
+        if old2:
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old2)
+
+
+def main() -> None:
+    if os.path.exists(Storage.wd):
+        shutil.rmtree(Storage.wd)
+    parse(Cfg, " ".join(sys.argv[1:]))
+    if "v" in Cfg.opts:
+        Censor.output = print
+    scan(modules, Cfg.mod)
+    nrs = Cfg.index or 1
+    cli = CLI()
+    waiters = []
+    for _nr in range(nrs):
+        waiters.append(launch(payload, cli, name=f"payload {_nr}"))
+    result = 1
+    for wtr in waiters:
+        result += wtr.join() or 1
+    consume(events)
+    endtime = time.time()
+    lap = laps(endtime - STARTTIME)
+    percall = (endtime - STARTTIME)/result
+    print(f"{lap} {result} {percall}")
+
+
+if __name__ == "__main__":
+    wrap(main)

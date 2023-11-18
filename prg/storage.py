@@ -23,6 +23,7 @@ lock = _thread.allocate_lock()
 def __dir__():
     return (
         'Storage',
+        'cdir',
         'fetch',
         'find',
         'fns',
@@ -31,8 +32,12 @@ def __dir__():
         'last',
         'lsmod',
         'strip',
-        'sync'
+        'sync',
+        'where'
     )
+
+
+__all__ = __dir__()
 
 
 class Storage(Object):
@@ -211,6 +216,15 @@ def spl(txt) -> []:
 
 def strip(pth, nmr=3) -> str:
     return os.sep.join(pth.split(os.sep)[-nmr:])
+
+
+def where():
+    res = "/"
+    for name in __file__.split(os.sep):
+        res = os.path.join(res, name)
+        if name == "libobj":
+            break
+    return res
 
 
 def fetch(obj, pth) -> None:

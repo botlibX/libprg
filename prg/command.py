@@ -1,6 +1,6 @@
 # This file is placed in the Public Domain.
 #
-# pylint: disable=C,R,W0212,E0402,W0105 W0718,W0702,E1102,W0246
+# pylint: disable=C,R,W0718
 
 
 "commands"
@@ -13,6 +13,15 @@ from .brokers import Broker
 from .excepts import Errors
 from .objects import Object
 from .parsers import parse
+
+
+def __dir__():
+    return (
+        'Commands',
+    )
+
+
+__all__ = __dir__()
 
 
 class Commands(Object):

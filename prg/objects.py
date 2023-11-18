@@ -3,30 +3,7 @@
 # pylint: disable=C,R,W0105,E0402,W0622,W0102
 
 
-"""a clean namespace
-
-This package provides a Object class that can be written to
-and read from disk. To provide a clean namespace to load json
-data into, this class is without any methods defined on it and
-methods are provided as functions taking an object as the first
-argument.
-
-basic usage is this:
-
-
-    >>> from obj.object import Object, read, write
-    >>> o = Object()
-    >>> o.a = "b"
-    >>> write(o, ".test/testing")
-    >>> oo = Object()
-    >>> read(oo, ".test/testing")
-    >>> oo
-    {"a": "b"}
-
-
-this package is a Work In Progress (WIP).
-
-"""
+"a clean namespace"
 
 
 import json
@@ -40,13 +17,14 @@ def __dir__():
             'edit',
             'fmt',
             'fqn',
-            'ident',
             'items',
             'keys',
-            'search',
             'update',
             'values',
            )
+
+
+__all__ = __dir__()
 
 
 class Object:

@@ -1,6 +1,6 @@
 # This file is placed in the Public Domain.
 #
-# pylint: disable=C,R,W0212,E0402,W0105 W0718,W0702,E1102,W0246
+# pylint: disable=C,R,E1102
 
 
 "exceptions"
@@ -10,20 +10,17 @@ import io
 import traceback
 
 
+from .censors import Censor
 from .objects import Object
 
 
-class Censor(Object):
+def __dir__():
+    return (
+        'Errors',
+    )
 
-    output = None
-    words = []
 
-    @staticmethod
-    def skip(txt) -> bool:
-        for skp in Censor.words:
-            if skp in str(txt):
-                return True
-        return False
+__all__ = __dir__()
 
 
 class Errors(Object):

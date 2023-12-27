@@ -1,6 +1,6 @@
 # This file is placed in the Public Domain.
 #
-# pylint: disable=C0116,W0105,E0402,E0401
+# pylint: disable=C0116,W0105,E0402,E0401,E0611
 
 
 "show running threads"
@@ -10,7 +10,7 @@ import threading
 import time
 
 
-from .. import Object, laps, update
+from prg import Object, laps, update
 
 
 STARTTIME = time.time()

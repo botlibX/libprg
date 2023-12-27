@@ -11,14 +11,17 @@ import json
 
 def __dir__():
     return (
-            'Default',
             'Object',
             'construct',
+            'dump',
+            'dumps',
             'edit',
             'fmt',
             'fqn',
             'items',
             'keys',
+            'load',
+            'loads',
             'update',
             'values',
            )
@@ -30,33 +33,20 @@ __all__ = __dir__()
 class Object:
 
 
+    def __contains__(self, key):
+        return key in dir(self)
+
     def __iter__(self):
-        ""
         return iter(self.__dict__)
 
     def __len__(self):
-        ""
         return len(self.__dict__)
 
     def __repr__(self):
-        ""
         return dumps(self)
 
     def __str__(self):
-        ""
         return str(self.__dict__)
-
-
-class Default(Object):
-
-    __slots__ = ("__default__",)
-
-    def __init__(self):
-        Object.__init__(self)
-        self.__default__ = ""
-
-    def __getattr__(self, key):
-        return self.__dict__.get(key, self.__default__)
 
 
 class ObjectDecoder(json.JSONDecoder):
@@ -75,7 +65,7 @@ def hook(objdict, typ=None) -> Object:
     if typ:
         obj = typ()
     else:
-        obj = Default()
+        obj = Object()
     construct(obj, objdict)
     return obj
 
@@ -138,6 +128,9 @@ def dumps(*args, **kw) -> str:
     return json.dumps(*args, **kw)
 
 
+"methods"
+
+
 def construct(obj, *args, **kwargs) -> None:
     if args:
         val = args[0]
@@ -180,6 +173,8 @@ def fmt(obj, args=None, skip=None, plain=False) -> str:
         skip = []
     txt = ""
     for key in args:
+        if key.startswith("__"):
+            continue
         if key in skip:
             continue
         value = getattr(obj, key, None)

@@ -3,35 +3,37 @@
 # pylint: disable=C,R,E1102
 
 
-"exceptions"
+"errors"
 
 
 import io
 import traceback
 
 
-from .censors import Censor
-from .objects import Object
+from .object import Object
 
 
 def __dir__():
     return (
-        'Errors',
+        'Error',
+        'debug'
     )
 
 
 __all__ = __dir__()
 
 
-class Errors(Object):
+class Error(Object):
 
     errors = []
+    filter = []
+    output = None
     shown  = []
 
     @staticmethod
     def add(exc) -> None:
         excp = exc.with_traceback(exc.__traceback__)
-        Errors.errors.append(excp)
+        Error.errors.append(excp)
 
     @staticmethod
     def format(exc) -> str:
@@ -49,13 +51,23 @@ class Errors(Object):
 
     @staticmethod
     def handle(exc) -> None:
-        if Censor.output:
-            txt = str(Errors.format(exc))
-            if txt not in Errors.shown:
-                Censor.output(txt)
-                Errors.shown.append(txt)
+        if Error.output:
+            txt = str(Error.format(exc))
+            Error.output(txt)
 
     @staticmethod
     def show() -> None:
-        for exc in Errors.errors:
-            Errors.handle(exc)
+        for exc in Error.errors:
+            Error.handle(exc)
+
+    @staticmethod
+    def skip(txt) -> bool:
+        for skp in Error.filter:
+            if skp in str(txt):
+                return True
+        return False
+
+
+def debug(txt):
+    if Error.output and not Error.skip(txt):
+        Error.output(txt)

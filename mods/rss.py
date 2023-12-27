@@ -1,6 +1,6 @@
 # This file is placed in the Public Domain.
 #
-# pylint: disable=C,R,W0612,W0201
+# pylint: disable=C,R,W0612,W0201,E0611
 
 
 "rich site syndicate"
@@ -18,8 +18,12 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from .. import Broker, Default, Object, Repeater
-from .. import find, fmt, fntime, laps, last, launch, sync, update
+from prg import Default, Fleet, Object
+from prg import fmt, fntime, update
+from prg import find, laps, last, launch, write
+
+
+from .repeat import Repeat
 
 
 def init():
@@ -99,17 +103,19 @@ class Fetcher(Object):
                     Fetcher.seen.urls.append(uurl)
                 counter += 1
                 if self.dosave:
-                    sync(fed)
+                    write(fed)
                 res.append(fed)
         if res:
-            sync(Fetcher.seen, Fetcher.seenfn)
+            write(Fetcher.seen, Fetcher.seenfn)
         txt = ''
         feedname = getattr(feed, 'name', None)
         if feedname:
             txt = f'[{feedname}] '
         for obj in res:
             txt2 = txt + self.display(obj)
-            Broker.announce(txt2.rstrip())
+            for bot in Fleet.objs:
+                if "announce" in dir(bot):
+                    bot.announce(txt2.rstrip())
         return counter
 
     def run(self):
@@ -121,7 +127,7 @@ class Fetcher(Object):
     def start(self, repeat=True):
         Fetcher.seenfn = last(Fetcher.seen)
         if repeat:
-            repeater = Repeater(300.0, self.run)
+            repeater = Repeat(300.0, self.run)
             repeater.start()
 
 
@@ -217,19 +223,19 @@ def dpl(event):
     for fnm, feed in find('rss', {'rss': event.args[0]}):
         if feed:
             update(feed, setter)
-            sync(feed)
+            write(feed)
     event.reply('ok')
 
 
 def nme(event):
     if len(event.args) != 2:
-        event.reply('name <stringinurl> <name>')
+        event.reply('nme <stringinurl> <name>')
         return
     selector = {'rss': event.args[0]}
     for fnm, feed in find('rss', selector):
         if feed:
             feed.name = event.args[1]
-            sync(feed)
+            write(feed)
     event.reply('ok')
 
 
@@ -241,7 +247,7 @@ def rem(event):
     for fnm, feed in find('rss', selector):
         if feed:
             feed.__deleted__ = True
-            sync(feed)
+            write(feed, fnm)
     event.reply('ok')
 
 
@@ -266,5 +272,5 @@ def rss(event):
             return
     feed = Rss()
     feed.rss = event.args[0]
-    sync(feed)
+    write(feed)
     event.reply('ok')

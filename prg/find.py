@@ -18,6 +18,7 @@ from .storage import Storage, ident, read
 def __dir__():
     return (
         'find',
+        'fntime',
         'ident',
         'last',
         'search',

@@ -10,7 +10,7 @@ import threading
 
 
 from .default import Default
-from .group   import Group
+from .fleet   import Fleet
 
 
 def __dir__():
@@ -41,7 +41,7 @@ class Event(Default):
 
     def show(self) -> None:
         for txt in self.result:
-            bot = Group.byorig(self.orig) or Group.first()
+            bot = Fleet.byorig(self.orig) or Fleet.first()
             if bot:
                 bot.say(self.channel, txt)
 

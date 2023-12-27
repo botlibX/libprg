@@ -10,11 +10,13 @@ import threading
 import time
 
 
-from prg import Object, launch
+from .object import Object
+from .thread import Thread, launch
 
 
 def __dir__():
     return (
+        'Repeat',
         'Timer',
     )
 
@@ -52,3 +54,11 @@ class Timer(Object):
     def stop(self) -> None:
         if self.timer:
             self.timer.cancel()
+
+
+class Repeat(Timer):
+
+    def run(self) -> Thread:
+        thr = launch(self.start)
+        super().run()
+        return thr

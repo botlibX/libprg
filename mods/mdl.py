@@ -11,11 +11,8 @@ import datetime
 import time
 
 
-from prg import Event, Fleet, Object
+from prg import Event, Fleet, Object, Repeat
 from prg import construct, keys, laps, launch
-
-
-from .repeat import Repeat
 
 
 def __dir__():

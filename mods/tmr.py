@@ -9,14 +9,9 @@
 import time
 
 
-from prg import Event, Fleet
+from prg import Event, Fleet, Timer
 from prg import find, laps, launch, update, write
-
-
-from prg.parse import NoDate, today, to_day, get_day, get_hour
-
-
-from .timer import Timer
+from prg import NoDate, today, to_day, get_day, get_hour
 
 
 def init():

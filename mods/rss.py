@@ -18,12 +18,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from prg import Default, Fleet, Object
+from prg import Default, Fleet, Object, Repeat
 from prg import fmt, fntime, update
 from prg import find, laps, last, launch, write
-
-
-from .repeat import Repeat
 
 
 def init():

@@ -11,10 +11,13 @@ name = "libprg"
 description = "program library"
 version = "6"
 authors = [
-    {name = "libprg",email = "libbotx@gmail.com"},
+    {name = "Bart Thate",email = "libbotx@gmail.com"},
 ]
 readme = "README.rst"
 license = {text="Public Domain"}
+dependencies = [
+    "libobj",
+]
 classifiers = [ 
     'Development Status :: 3 - Alpha',
     'License :: Public Domain',
@@ -22,10 +25,6 @@ classifiers = [
     'Programming Language :: Python',
     'Topic :: Utilities'
 ]
-
-
-[project.scripts]
-"prg" = "prg.__main__:wrapped"
 
 
 [project.urls]
@@ -42,7 +41,7 @@ zip-safe=true
 
 
 [tool.setuptools.data-files]
-"share/doc/libbot" = [
+"share/doc/libprg" = [
     "README.rst",
 ]
 

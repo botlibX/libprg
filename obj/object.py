@@ -6,7 +6,9 @@
 "a clean namespace"
 
 
+import datetime
 import json
+import sys
 
 
 def __dir__():
@@ -18,6 +20,7 @@ def __dir__():
             'edit',
             'fmt',
             'fqn',
+            'ident',
             'items',
             'keys',
             'load',
@@ -195,6 +198,12 @@ def fqn(obj) -> str:
         kin = obj.__name__
     return kin
 
+
+def ident(obj) -> str:
+    return os.path.join(
+                        fqn(obj),
+                        os.path.join(*str(datetime.datetime.now()).split())
+                       )
 
 def items(obj) -> []:
     if isinstance(obj, type({})):

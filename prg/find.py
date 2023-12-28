@@ -10,15 +10,13 @@ import os
 import time
 
 
-from .default import Default
-from .object  import fqn, items, update
-from .storage import Storage, ident, read
+from obj import Default, fqn, ident, items, update
+from prg import Storage, read
 
 
 def __dir__():
     return (
         'find',
-        'fntime',
         'ident',
         'last',
         'search',

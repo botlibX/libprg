@@ -7,22 +7,25 @@
 
 
 import datetime
+import os
 import re
 import time as ttime
 
 
-from .default import Default
+from obj import Default
 
 
 def __dir__():
     return (
         'NoDate',
+        'fntime',
         'get_day',
         'get_hour',
         'get_time',
         'laps',
         'parse_command',
         'parse_time',
+        'spl',
         'today',
         'to_day'
     )
@@ -47,10 +50,6 @@ class NoDate(Exception):
     pass
 
 
-def today():
-    return str(datetime.datetime.today()).split()[0]
-
-
 def extract_date(daystr):
     for fmt in year_formats:
         try:
@@ -59,6 +58,19 @@ def extract_date(daystr):
             res = None
         if res:
             return res
+
+
+def fntime(daystr) -> float:
+    daystr = daystr.replace('_', ':')
+    datestr = ' '.join(daystr.split(os.sep)[-2:])
+    if '.' in datestr:
+        datestr, rest = datestr.rsplit('.', 1)
+    else:
+        rest = ''
+    timed = ttime.mktime(ttime.strptime(datestr, '%Y-%m-%d %H:%M:%S'))
+    if rest:
+        timed += float('.' + rest)
+    return timed
 
 
 def get_day(daystr):
@@ -225,6 +237,14 @@ def parse_time(txt):
     return target
 
 
+def spl(txt) -> []:
+    try:
+        res = txt.split(',')
+    except (TypeError, ValueError):
+        res = txt
+    return [x for x in res if x]
+
+
 def to_day(daystr):
     previous = ""
     line = ""
@@ -239,3 +259,7 @@ def to_day(daystr):
         if res:
             return res
         line = ""
+
+
+def today():
+    return str(datetime.datetime.today()).split()[0]

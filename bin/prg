@@ -1,28 +1,32 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
 #
-# pylint: disable=C,R,W0201,W0212,W0105,W0613,W0406,E0102,W0611
+# pylint: disable=C,R,W0201,W0212,W0105,W0613,W0406,E0102,W0611,W0718,W0125
 
 
 "24/7 feed fetcher"
 
 
 import getpass
+import inspect
+import io
 import os
+import queue
 import readline
 import sys
 import termios
+import threading
 import time
+import traceback
+import types
+import _thread
 
 
-from prg import Client, Default, Error, Event, Storage
-from prg import cmnd, debug, forever, parse_command, scan
+sys.path.insert(0, os.getcwd())
 
 
-if os.path.exists("mods"):
-    import mods
-else:
-    mods = None
+from obj import Default, Object
+from prg import Storage, parse_command, spl
 
 
 Cfg         = Default()
@@ -34,8 +38,158 @@ Cfg.pidfile = os.path.join(Cfg.wd, f"{Cfg.name}.pid")
 Cfg.user    = getpass.getuser()
 
 
-Error.output = print
 Storage.wd   = Cfg.wd
+
+
+class Error(Object):
+
+    errors = []
+    filter = []
+    output = print
+    shown  = []
+
+    @staticmethod
+    def add(exc) -> None:
+        excp = exc.with_traceback(exc.__traceback__)
+        Error.errors.append(excp)
+
+    @staticmethod
+    def format(exc) -> str:
+        res = ""
+        stream = io.StringIO(
+                             traceback.print_exception(
+                                                       type(exc),
+                                                       exc,
+                                                       exc.__traceback__
+                                                      )
+                            )
+        for line in stream.readlines():
+            res += line + "\n"
+        return res
+
+    @staticmethod
+    def handle(exc) -> None:
+        if Error.output:
+            txt = str(Error.format(exc))
+            Error.output(txt)
+
+    @staticmethod
+    def show() -> None:
+        for exc in Error.errors:
+            Error.handle(exc)
+
+    @staticmethod
+    def skip(txt) -> bool:
+        for skp in Error.filter:
+            if skp in str(txt):
+                return True
+        return False
+
+
+class Command(Object):
+
+    cmds = Object()
+
+    @staticmethod
+    def add(func) -> None:
+        setattr(Command.cmds, func.__name__, func)
+
+    @staticmethod
+    def handle(evt):
+        parse_command(evt)
+        func = getattr(Command.cmds, evt.cmd, None)
+        if func:
+            try:
+                func(evt)
+                evt.show()
+            except Exception as exc:
+                Error.add(exc)
+        evt.ready()
+
+
+class Event(Default):
+
+    def __init__(self):
+        Default.__init__(self)
+        self._ready  = threading.Event()
+        self._thr    = None
+        self.done    = False
+        self.orig    = None
+        self.result  = []
+        self.txt     = ""
+
+    def ready(self):
+        self._ready.set()
+
+    def reply(self, txt) -> None:
+        self.result.append(txt)
+
+    def show(self) -> None:
+        for txt in self.result:
+            bot = Fleet.byorig(self.orig) or Fleet.first()
+            if bot:
+                bot.say(self.channel, txt)
+
+    def wait(self):
+        if self._thr:
+            self._thr.join()
+        self._ready.wait()
+        return self.result
+
+
+class Handler(Object):
+
+    def __init__(self):
+        Object.__init__(self)
+        self.cbs      = Object()
+        self.queue    = queue.Queue()
+        self.stopped  = threading.Event()
+
+    def callback(self, evt) -> None:
+        func = getattr(self.cbs, evt.type, None)
+        if not func:
+            evt.ready()
+            return
+        evt._thr = launch(func, evt)
+
+    def loop(self) -> None:
+        while not self.stopped.is_set():
+            try:
+                self.callback(self.poll())
+            except (KeyboardInterrupt, EOFError):
+                _thread.interrupt_main()
+
+    def poll(self):
+        return self.queue.get()
+
+    def put(self, evt) -> None:
+        self.queue.put_nowait(evt)
+
+    def register(self, typ, cbs) -> None:
+        setattr(self.cbs, typ, cbs)
+
+    def start(self) -> None:
+        launch(self.loop)
+
+    def stop(self) -> None:
+        self.stopped.set()
+
+
+class Client(Handler):
+
+    def __init__(self):
+        Handler.__init__(self)
+        self.register("command", Command.handle)
+        Fleet.add(self)
+
+    def announce(self, txt):
+        self.raw(txt)
+
+    def say(self, channel, txt):
+        self.raw(txt)
+
+    def raw(self, txt):
+        pass
 
 
 class Console(Client):
@@ -56,6 +210,175 @@ class Console(Client):
         print(txt)
 
 
+class Fleet(Object):
+
+    objs = []
+
+    @staticmethod
+    def add(obj) -> None:
+        Fleet.objs.append(obj)
+
+    @staticmethod
+    def first():
+        if Fleet.objs:
+            return Fleet.objs[0]
+
+    @staticmethod
+    def remove(obj):
+        if obj in Fleet.objs:
+            Fleet.objs.remove(obj)
+
+    @staticmethod
+    def byorig(orig) -> Object:
+        for obj in Fleet.objs:
+            if object.__repr__(obj) == orig:
+                return obj
+        return None
+
+
+class Thread(threading.Thread):
+
+    def __init__(self, func, thrname, *args, daemon=True, **kwargs):
+        super().__init__(None, self.run, thrname, (), {}, daemon=daemon)
+        self._result   = None
+        self.name      = thrname or name(func)
+        self.queue     = queue.Queue()
+        self.sleep     = None
+        self.starttime = time.time()
+        self.queue.put_nowait((func, args))
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        for k in dir(self):
+            yield k
+
+    def join(self, timeout=None) -> type:
+        super().join(timeout)
+        return self._result
+
+    def run(self) -> None:
+        func, args = self.queue.get()
+        try:
+            self._result = func(*args)
+        except Exception as exc:
+            Error.add(exc)
+            if args and "ready" in dir(args[0]):
+                args[0].ready()
+
+
+class Timer(Object):
+
+    def __init__(self, sleep, func, *args, thrname=None):
+        Object.__init__(self)
+        self.args  = args
+        self.func  = func
+        self.sleep = sleep
+        self.name  = thrname or str(self.func).split()[2]
+        self.state = {}
+        self.timer = None
+
+    def run(self) -> None:
+        self.state["latest"] = time.time()
+        launch(self.func, *self.args)
+
+    def start(self) -> None:
+        timer = threading.Timer(self.sleep, self.run)
+        timer.name   = self.name
+        timer.daemon = True
+        timer.sleep  = self.sleep
+        timer.state  = self.state
+        timer.func   = self.func
+        timer.state["starttime"] = time.time()
+        timer.state["latest"]    = time.time()
+        timer.start()
+        self.timer   = timer
+
+    def stop(self) -> None:
+        if self.timer:
+            self.timer.cancel()
+
+
+class Repeater(Timer):
+
+    def run(self) -> Thread:
+        thr = launch(self.start)
+        super().run()
+        return thr
+
+
+"utility"
+
+
+def byorig(orig):
+    return Fleet.byorig(orig)
+
+
+def cmnd(txt):
+    evn = Event()
+    evn.txt = txt
+    Command.handle(evn)
+    evn.wait()
+    return evn
+
+
+def debug(txt):
+    if Error.output and not Error.skip(txt):
+        Error.output(txt)
+
+def forever():
+    while 1:
+        try:
+            time.sleep(1.0)
+        except (KeyboardInterrupt, EOFError):
+            _thread.interrupt_main()
+
+
+def launch(func, *args, **kwargs):
+    nme = kwargs.get("name", name(func))
+    thread = Thread(func, nme, *args, **kwargs)
+    thread.start()
+    return thread
+
+
+def name(obj) -> str:
+    typ = type(obj)
+    if isinstance(typ, types.ModuleType):
+        return obj.__name__
+    if '__self__' in dir(obj):
+        return f'{obj.__self__.__class__.__name__}.{obj.__name__}'
+    if '__class__' in dir(obj) and '__name__' in dir(obj):
+        return f'{obj.__class__.__name__}.{obj.__name__}'
+    if '__class__' in dir(obj):
+        return f"{obj.__class__.__module__}.{obj.__class__.__name__}"
+    if '__name__' in dir(obj):
+        return f'{obj.__class__.__name__}.{obj.__name__}'
+    return None
+
+
+def scan(pkg, modstr, initer=False, wait=True) -> []:
+    mds = []
+    for modname in spl(modstr):
+        module = getattr(pkg, modname, None)
+        if not module:
+            continue
+        for _key, cmd in inspect.getmembers(module, inspect.isfunction):
+            if 'event' in cmd.__code__.co_varnames:
+                Command.add(cmd)
+        for _key, clz in inspect.getmembers(module, inspect.isclass):
+            if not issubclass(clz, Object):
+                continue
+            Storage.add(clz)
+        if initer and "init" in dir(module):
+            module._thr = launch(module.init, name=f"init {modname}")
+            mds.append(module)
+    if wait and initer:
+        for mod in mds:
+            mod._thr.join()
+    return mds
+
+
 def wrap(func) -> None:
     old2 = None
     try:
@@ -69,6 +392,16 @@ def wrap(func) -> None:
     finally:
         if old2:
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old2)
+
+
+
+"runtime"
+
+
+if os.path.exists("mods"):
+    import mods
+else:
+    mods = None
 
 
 def main():

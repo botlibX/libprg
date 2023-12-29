@@ -14,13 +14,7 @@ import time
 
 
 from obj import Object
-
-
-from . import getmain
-
-
-Fleet = getmain("Fleet")
-launch = getmain("launch")
+from prg import Fleet, launch
 
 
 def init():

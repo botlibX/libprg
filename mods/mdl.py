@@ -12,16 +12,7 @@ import time
 
 
 from obj import Object, construct, keys
-from prg import laps
-
-
-from . import getmain
-
-
-Event  = getmain("Event")
-Fleet  = getmain("Fleet")
-Repeat = getmain("Repeater")
-launch = getmain("launch")
+from prg import Event, Fleet, Repeater, laps, launch
 
 
 def __dir__():
@@ -39,7 +30,7 @@ def init():
             evt.txt = ""
             evt.rest = key
             sec = seconds(val)
-            repeater = Repeat(sec, cbstats, evt, thrname=aliases.get(key))
+            repeater = Repeater(sec, cbstats, evt, thrname=aliases.get(key))
             repeater.start()
     launch(daily, name="daily")
     

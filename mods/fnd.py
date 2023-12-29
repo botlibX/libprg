@@ -9,6 +9,7 @@
 from obj import fmt
 from prg import Storage, find
 
+
 def fnd(event):
     Storage.skel()
     if not event.rest:

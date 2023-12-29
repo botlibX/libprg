@@ -17,19 +17,8 @@ import _thread
 
 
 from obj import Default, Object, edit, fmt, keys
-from prg import last, write
-
-
-from . import getmain
-
-
-Client  = getmain("Client")
-Command = getmain("Command")
-Error   = getmain("Error")
-Event   = getmain("Event")
-byorig  = getmain("byorig")
-debug   = getmain("debug")
-launch  = getmain("launch")
+from prg import Client, Command, Error, Event
+from prg import byorig, debug, last, launch, write
 
 
 Error.filter = ["PING", "PONG", "PRIVMSG"]

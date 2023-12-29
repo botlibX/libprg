@@ -19,15 +19,9 @@ from urllib.parse import quote_plus, urlencode
 
 
 from obj import Default, Object, fmt, update
-from prg import fntime, find, laps, last, write
+from prg import Fleet, Repeater
+from prg import fntime, find, launch, laps, last, write
 
-
-from . import getmain
-
-
-Fleet    = getmain("Fleet")
-Repeater = getmain("Repeater")
-launch   = getmain("launch")
 
 
 def init():

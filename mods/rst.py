@@ -15,15 +15,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
 from obj import Default, Object
-from prg import Storage
-
-
-from . import getmain
-
-
-Error = getmain("Error")
-debug = getmain("debug")
-launch = getmain("launch")
+from prg import Error, Storage, debug, launch
 
 
 def init():

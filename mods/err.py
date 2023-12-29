@@ -6,11 +6,7 @@
 "status of bots"
 
 
-from . import getmain
-
-
-Fleet = getmain("Fleet")
-Error = getmain("Error")
+from prg import Error, Fleet
 
 
 def err(event):

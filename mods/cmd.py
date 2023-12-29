@@ -6,10 +6,7 @@
 "list of commands"
 
 
-from . import getmain
-
-
-Command = getmain("Command")
+from prg import Command
 
 
 def cmd(event):
